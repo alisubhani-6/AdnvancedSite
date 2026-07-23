@@ -1,0 +1,127 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Order Confirmation — Peak Theory</title>
+</head>
+<body style="margin:0; padding:0; background:#0a0d09; font-family: 'Space Grotesk', Arial, sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0a0d09; padding: 40px 0;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#12160f; border:1px solid rgba(215,255,62,0.15); border-radius:16px; overflow:hidden;">
+
+        <tr>
+          <td style="padding: 32px 40px; border-bottom: 1px solid rgba(215,255,62,0.15);">
+            <div style="font-family: Arial, sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 1px; color: #f6f7f1; text-transform: uppercase;">
+              <span style="color:#d7ff3e;">●</span> PEAK THEORY
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding: 8px 40px 0;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: rgba(227,27,35,0.12); border: 1px solid #e31b23; border-radius: 10px; margin-top: 24px;">
+              <tr>
+                <td style="padding: 14px 18px; font-size: 13px; line-height: 1.5; color: #f6f7f1;">
+                  <strong style="color:#e31b23;">PROTOTYPE NOTICE:</strong> This is a demo storefront built for testing purposes only. No payment was actually processed and <strong>no order will be delivered</strong>. This email exists to demonstrate the checkout flow.
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding: 32px 40px 8px;">
+            <div style="font-family: Arial, sans-serif; font-size: 26px; font-weight: 800; color: #f6f7f1; text-transform: uppercase; letter-spacing: 0.5px;">
+              Dispatch Confirmed
+            </div>
+            <p style="font-size: 14px; color: rgba(246,247,241,0.62); margin-top: 8px; line-height: 1.6;">
+              Hi {{ order.name }}, thanks for testing the checkout. Here's a summary of the order you just placed.
+            </p>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding: 8px 40px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: rgba(10,13,9,0.6); border: 1px solid rgba(215,255,62,0.15); border-radius: 12px;">
+              <tr>
+                <td style="padding: 16px 20px;">
+                  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #d7ff3e; margin-bottom: 4px;">Order Reference</div>
+                  <div style="font-size: 16px; font-weight: 700; color: #f6f7f1;">{{ order_reference }}</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding: 24px 40px 8px;">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #d7ff3e; margin-bottom: 12px;">Items</div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              {% for item in order_items %}
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid rgba(215,255,62,0.1); font-size: 14px; color: #f6f7f1;">
+                  {{ item.name }} <span style="color: rgba(246,247,241,0.5);">× {{ item.qty }}</span>
+                </td>
+                <td align="right" style="padding: 10px 0; border-bottom: 1px solid rgba(215,255,62,0.1); font-size: 14px; color: #d7ff3e; font-weight: 700;">
+                  ${{ item.line_total }}
+                </td>
+              </tr>
+              {% endfor %}
+            </table>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding: 16px 40px 8px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding: 4px 0; font-size: 13px; color: rgba(246,247,241,0.62);">Subtotal</td>
+                <td align="right" style="padding: 4px 0; font-size: 13px; color: rgba(246,247,241,0.62);">${{ order.subtotal }}</td>
+              </tr>
+              <tr>
+                <td style="padding: 4px 0; font-size: 13px; color: rgba(246,247,241,0.62);">Shipping</td>
+                <td align="right" style="padding: 4px 0; font-size: 13px; color: rgba(246,247,241,0.62);">
+                  {% if order.shipping_cost == 0 %}FREE{% else %}${{ order.shipping_cost }}{% endif %}
+                </td>
+              </tr>
+              {% if order.discount_amount > 0 %}
+              <tr>
+                <td style="padding: 4px 0; font-size: 13px; color: #d7ff3e;">Discount</td>
+                <td align="right" style="padding: 4px 0; font-size: 13px; color: #d7ff3e;">-${{ order.discount_amount }}</td>
+              </tr>
+              {% endif %}
+              <tr>
+                <td style="padding: 12px 0 4px; border-top: 1px dashed rgba(215,255,62,0.2); font-size: 16px; font-weight: 700; color: #f6f7f1;">Total</td>
+                <td align="right" style="padding: 12px 0 4px; border-top: 1px dashed rgba(215,255,62,0.2); font-size: 20px; font-weight: 800; color: #d7ff3e;">${{ order.total_amount }}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding: 24px 40px 32px;">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #d7ff3e; margin-bottom: 8px;">Shipping To</div>
+            <div style="font-size: 14px; color: #f6f7f1; line-height: 1.6;">
+              {{ order.name }}<br>
+              {{ order.address }}<br>
+              {{ order.phone }}
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding: 20px 40px; background: rgba(10,13,9,0.6); border-top: 1px solid rgba(215,255,62,0.15);">
+            <p style="font-size: 12px; color: rgba(246,247,241,0.45); margin: 0; line-height: 1.6;">
+              Peak Theory is a prototype e-commerce site built for development and demonstration purposes. Reach out if you have questions about this test.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

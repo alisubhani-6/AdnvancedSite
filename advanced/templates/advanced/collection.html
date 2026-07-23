@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>COLLECTION — Peak Theory</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+    <style>
+      :root {
+        --bg-color: #f6f4ef; /* Warm off-white */
+        --accent-red: #e61d24; /* Vibrant brand red */
+        --text-dark: #111111;
+        --text-muted: #888888;
+      
+        /* Carousel sizing */
+        --slide-width: 26vw;
+        --slide-height: 55vh;
+      }
+      
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      
+      body,
+      html {
+        width: 100%;
+        height: 100vh;
+        background-color: var(--bg-color);
+        color: var(--text-dark);
+        overflow: hidden;
+        font-family: 'Space Grotesk', sans-serif;
+      }
+      
+      /* ===================== HEADER ===================== */
+      .header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 2.5rem 4vw;
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        z-index: 50;
+        pointer-events: none;
+        opacity: 0;
+      }
+      .header .col {
+        pointer-events: auto;
+      }
+      .header .left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .header .left::before {
+        content: '';
+        display: block;
+        width: 6px;
+        height: 6px;
+        background-color: var(--accent-red);
+        border-radius: 50%;
+      }
+      
+      .header .center {
+        display: flex;
+        align-items: center;
+      }
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+      
+      .nav-links span {
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      .nav-links span:hover {
+        color: var(--text-dark);
+      }
+      .nav-links .active {
+        color: var(--text-dark);
+        position: relative;
+      }
+      .nav-links .active::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: var(--accent-red);
+      }
+      .header .right a {
+        color: inherit;
+        text-decoration: none;
+      }
+      
+      .scroll-arrow {
+        display: none;
+      } /* Hidden on desktop */
+      
+      .mobile-card-controls {
+        display: none;
+      }
+      
+      /* ===================== SWIPER CAROUSEL ===================== */
+      .swiper-container-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        z-index: 25;
+      }
+      
+      .swiper {
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+      }
+      
+      .swiper-wrapper {
+        align-items: center;
+      }
+      
+      .swiper-slide {
+        width: var(--slide-width);
+        height: var(--slide-height);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        transform: scale(0.82);
+        transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      }
+      
+      .swiper-slide-active {
+        transform: scale(1);
+        z-index: 5;
+      }
+      
+      /* MEDIA QUERIES FOR RESPONSIVENESS */
+      @media (max-width: 1024px) {
+        :root {
+          --slide-width: 45vw;
+          --slide-height: 50vh;
+        }
+      }
+      @media (max-width: 768px) {
+        :root {
+          --slide-width: 75vw;
+          --slide-height: 55vh;
+        }
+        .mobile-contact {
+          display: block !important;
+        }
+        .header .right {
+          display: none !important;
+        }
+      
+        .header {
+          padding: 1rem 5vw;
+          display: block;
+          pointer-events: none;
+        }
+      
+        .header .left {
+          position: fixed;
+          top: 1.4rem;
+          left: 5vw;
+          z-index: 60;
+          font-size: 0.95rem;
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 900;
+          letter-spacing: -0.02em;
+          pointer-events: auto;
+          text-transform: uppercase;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+      
+        .header .left::before {
+          width: 8px;
+          height: 8px;
+          border: 1.5px solid var(--bg-color);
+        }
+      
+        /* Center Nav Widget */
+        .header .center {
+          position: fixed !important;
+          top: auto !important;
+          bottom: 1.15rem !important;
+          left: 5% !important;
+          transform: none !important;
+          width: 90% !important;
+          display: flex !important;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.58rem 0.9rem !important;
+          border: 1px solid rgba(230, 29, 36, 0.15);
+          border-radius: 1.2rem;
+          background: rgba(244, 243, 239, 0.95);
+          backdrop-filter: blur(18px) saturate(160%);
+          -webkit-backdrop-filter: blur(18px) saturate(160%);
+          box-shadow: 0 10px 30px rgba(227, 29, 36, 0.08), 0 14px 40px rgba(0, 0, 0, 0.05);
+          z-index: 60;
+          pointer-events: auto;
+          gap: 1rem; /* Space between links and contact button */
+        }
+      
+        /* Scrollable Container with centered content */
+        .nav-links {
+          display: flex;
+          gap: 1.25rem;
+          overflow-x: auto;
+          scroll-behavior: smooth;
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+          padding: 0.35rem 0.1rem;
+          flex-wrap: nowrap;
+          min-width: 0;
+          flex: 1;
+          justify-content: center; /* Center links inside widget */
+          align-items: center;
+        }
+      
+        .nav-links::-webkit-scrollbar {
+          display: none;
+        }
+      
+        .nav-links span {
+          font-size: 0.68rem;
+          white-space: nowrap;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+      
+        .nav-links .active {
+          color: var(--accent-red);
+        }
+      
+        /* FIX: Show Contact button inside the mobile floating widget */
+        
+      
+        .header .right a {
+          color: var(--accent-red);
+          font-weight: 700;
+        }
+      
+        /* Scroll Arrows Appearance */
+        .scroll-arrow {
+          display: none;
+        }
+      
+        .mobile-card-controls {
+          position: absolute;
+          left: 50%;
+          top: 6.2rem;
+          transform: translateX(-50%);
+          width: min(92vw, 420px);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 0.8rem;
+          z-index: 35;
+          pointer-events: auto;
+          opacity: 0;
+        }
+      
+        .mobile-card-arrow {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.35rem;
+          width: 48%;
+          border: 1px solid rgba(230, 29, 36, 0.18);
+          border-radius: 999px;
+          background: rgba(246, 244, 239, 0.95);
+          color: var(--accent-red);
+          padding: 0.7rem 0.9rem;
+          box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+          font-family: 'Space Grotesk', sans-serif;
+          font-size: 0.66rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          cursor: pointer;
+        }
+      
+        .mobile-card-arrow .arrow-icon {
+          font-size: 1rem;
+          line-height: 1;
+        }
+      
+        .giant-text {
+          font-size: clamp(4.1rem, 15vw, 8rem) !important;
+        }
+      
+        .product-card {
+          padding: 1rem;
+          width: 95%;
+          top: calc(50% - (var(--slide-height) / 2) + 10px);
+        }
+      
+        .product-title {
+          font-size: 0.95rem;
+        }
+      
+        .product-price {
+          font-size: 1rem;
+        }
+      
+        .product-meta {
+          font-size: 0.65rem;
+        }
+      
+        .buy-btn {
+          font-size: 0.65rem;
+        }
+      
+        .detail-panel {
+          padding: 1.25rem;
+          top: 40px;
+          height: calc(100% - 40px);
+          overflow-y: auto;
+        }
+      
+        .btn-close {
+          top: 50px;
+          right: 15px;
+          font-size: 1.8rem;
+        }
+      
+        .detail-info {
+          padding-top: 0;
+        }
+      
+        .detail-info h3 {
+          font-size: 1.1rem;
+          margin-bottom: 0.25rem;
+        }
+      
+        .detail-info p {
+          font-size: 0.8rem;
+          margin-bottom: 1rem;
+        }
+      
+        .btn-action {
+          padding: 0.6rem 0;
+          font-size: 0.75rem;
+        }
+      }
+      @media (max-width: 480px) {
+        :root {
+          --slide-width: 85vw;
+          --slide-height: 55vh;
+        }
+        .giant-text {
+          font-size: clamp(2.8rem, 12vw, 6rem) !important;
+        }
+      }
+      
+      .image-wrapper {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        background: #e0e0e0;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        z-index: 10;
+        margin-top: 40px;
+      }
+      
+      .image-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transform: scale(1.05);
+        transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      }
+      
+      .swiper-slide-active .image-wrapper img {
+        transform: scale(1);
+      }
+      .mobile-contact {
+        display: none;
+      }
+      
+      /* ===================== ANIMATED TEXT ===================== */
+      .giant-text-container {
+        position: absolute;
+        left: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 20;
+        pointer-events: none;
+        transform-origin: center center;
+      }
+      
+      .giant-text {
+        font-family: 'Montserrat', sans-serif;
+        font-size: clamp(8rem, 16vw, 24rem);
+        font-weight: 900;
+        color: var(--text-dark);
+        line-height: 0.75;
+        letter-spacing: -0.04em;
+        text-transform: uppercase;
+        margin: 0;
+        padding: 0;
+      }
+      
+      .giant-text.red {
+        color: var(--accent-red);
+      }
+      
+      /* ===================== PRODUCT CARDS ===================== */
+      .product-card {
+        position: absolute;
+        top: calc(50% - (var(--slide-height) / 2) + 20px);
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        background: rgba(246, 244, 239, 0.98);
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        opacity: 0;
+        z-index: 30;
+        border-bottom: 3px solid var(--accent-red);
+      }
+      
+      .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 0.5rem;
+      }
+      
+      .product-title {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 800;
+        font-size: 1.1rem;
+        color: var(--text-dark);
+        text-transform: uppercase;
+      }
+      
+      .product-price {
+        font-weight: 600;
+        color: var(--accent-red);
+        font-size: 1.15rem;
+      }
+      
+      .product-meta {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .buy-btn {
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--text-dark);
+        cursor: pointer;
+        border-bottom: 1px solid var(--text-dark);
+        padding-bottom: 2px;
+        transition: color 0.2s, border-color 0.2s;
+      }
+      .buy-btn:hover {
+        color: var(--accent-red);
+        border-color: var(--accent-red);
+      }
+      
+      /* ===================== DETAIL PANEL ===================== */
+      .detail-panel {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        height: calc(100% - 60px);
+        background: #fff;
+        z-index: 5;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 2rem;
+        border-top: 4px solid var(--accent-red);
+      }
+      
+      .btn-close {
+        position: absolute;
+        top: 75px;
+        right: 20px;
+        background: none;
+        border: none;
+        font-size: 2rem;
+        line-height: 1;
+        color: var(--text-dark);
+        cursor: pointer;
+        z-index: 40;
+        opacity: 0;
+        pointer-events: none;
+        transition: color 0.2s, opacity 0.35s ease;
+      }
+      .btn-close:hover {
+        color: var(--accent-red);
+      }
+      
+      .detail-info {
+        opacity: 0;
+        transform: translateY(20px);
+        padding-top: 1rem;
+      }
+      
+      .detail-info h3 {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.4rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+        color: var(--text-dark);
+      }
+      
+      .detail-info p {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+      }
+      
+      .detail-actions {
+        display: flex;
+        gap: 10px;
+      }
+      
+      .btn-action {
+        flex: 1;
+        padding: 0.8rem 0;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all 0.2s;
+      }
+      
+      .btn-add {
+        background: transparent;
+        color: var(--text-dark);
+        border: 1px solid var(--text-dark);
+      }
+      .btn-add:hover {
+        background: var(--text-dark);
+        color: #fff;
+      }
+      
+      .btn-buy {
+        background: var(--accent-red);
+        color: #fff;
+        border: 1px solid var(--accent-red);
+      }
+      .btn-buy:hover {
+        background: #c1181e;
+        border-color: #c1181e;
+      }
+    </style>
+  </head>
+  <body>
+    {% csrf_token %}
+    <header class="header">
+      <div class="col left">
+        <a href="/" style="text-decoration: none; color:black;"><span>PEAK THEORY</span></a>
+      </div>
+      <div class="col center">
+        <div class="nav-links">
+          <a href="/products" style="text-decoration: none;"><span>BALLS</span></a>
+          <span class="active">COLLECTION</span>
+          <a href="/lab" style="text-decoration: none;"><span>LAB</span></a>
+          <a href="/quality" style="text-decoration: none;"><span>QUALITY</span></a>
+          <a href="/contact" class="mobile-contact" style="text-decoration: none;"><span >CONTACT</span></a>
+        </div>
+      </div>
+      <div class="col right">
+        <a href="/contact" style="text-decoration: none;"><span >CONTACT</span></a>
+      </div>
+    </header>
+
+    <!-- Animated Text Wrapper -->
+    <div class="giant-text-container">
+      <div class="giant-text red">COLL</div>
+      <div class="giant-text">ECTION</div>
+    </div>
+
+    <div class="swiper-container-wrapper">
+      <div class="mobile-card-controls" aria-hidden="true">
+        <button class="mobile-card-arrow left-card-arrow" type="button">
+          <span class="arrow-icon">&#10094;</span>
+          <span>Scroll Left</span>
+        </button>
+        <button class="mobile-card-arrow right-card-arrow" type="button">
+          <span>Scroll Right</span>
+          <span class="arrow-icon">&#10095;</span>
+        </button>
+      </div>
+      <div class="swiper mySwiper">
+        <div class="swiper-wrapper">
+          {% for boot in boots %}
+            <div class="swiper-slide" data-id="{{ boot.id }}" data-name="{{ boot.name }}" data-tag="{{ boot.get_status_display }}" data-price="{{ boot.price }}" data-image="{{ boot.image }}">
+              <div class="detail-panel">
+                <div class="detail-info">
+                  <h3>{{ boot.name }}</h3>
+                  <p>{{ boot.description }}</p>
+                  <div class="detail-actions">
+                    <button class="btn-action btn-add">Add to Cart</button>
+                    <button class="btn-action btn-buy">Buy Now</button>
+                  </div>
+                </div>
+              </div>
+
+              <button class="btn-close">&times;</button>
+
+              <div class="image-wrapper target-image">
+                <img src="{{ boot.image }}" alt="{{ boot.name }}" />
+              </div>
+
+              <div class="product-card">
+                <div class="card-top">
+                  <div class="product-title">{{ boot.name }}</div>
+                  <div class="product-price">${{ boot.price|floatformat:2 }}</div>
+                </div>
+                <div class="product-meta">
+                  <span>{{ boot.get_status_display }}</span>
+                  <button class="buy-btn">View Details</button>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const isMobile = window.innerWidth <= 768
+        const initialGap = isMobile ? '80vw' : '1150px'
+        const initialBoxSize = isMobile ? '100px' : '160px'
+      
+        // 1. Initialize Infinite Circular Swiper
+        const swiper = new Swiper('.mySwiper', {
+          loop: true,
+          slidesPerView: 'auto',
+          centeredSlides: true,
+          spaceBetween: 60,
+          speed: 800,
+          mousewheel: { forceToAxis: true },
+          keyboard: true,
+          allowTouchMove: false,
+          grabCursor: false
+        })
+      
+        // 2. Setup Exact Initial States for GSAP
+        gsap.set('.swiper-slide:not(.swiper-slide-active) .target-image', { opacity: 0 })
+      
+        const activeImgWrapper = document.querySelector('.swiper-slide-active .target-image')
+        gsap.set(activeImgWrapper, {
+          width: initialBoxSize,
+          height: initialBoxSize,
+          opacity: 1
+        })
+      
+        gsap.set('.giant-text-container', {
+          top: '50%',
+          yPercent: -50,
+          xPercent: -50,
+          scale: 0.18,
+          gap: initialGap
+        })
+      
+        // 3. Main Timeline Animation
+        const tl = gsap.timeline({
+          delay: 0.5,
+          onComplete: () => {
+            swiper.params.allowTouchMove = true
+            swiper.params.grabCursor = true
+            swiper.update()
+      
+            swiper.on('slideChangeTransitionEnd', updateCards)
+            updateCards()
+          }
+        })
+      
+        tl.to(
+          activeImgWrapper,
+          {
+            width: '100%',
+            height: '100%',
+            duration: 1.5,
+            ease: 'expo.inOut'
+          },
+          0
+        )
+      
+          .to(
+            '.giant-text-container',
+            {
+              top: '80%',
+              yPercent: -50,
+              scale: 1,
+              gap: '0px',
+              duration: 1.5,
+              ease: 'expo.inOut'
+            },
+            0
+          )
+      
+          .to(
+            '.swiper-slide:not(.swiper-slide-active) .target-image',
+            {
+              opacity: 1,
+              duration: 1,
+              stagger: 0.1,
+              ease: 'power2.out'
+            },
+            '-=0.8'
+          )
+      
+          .to(
+            '.mobile-card-controls',
+            {
+              opacity: 1,
+              duration: 0.6,
+              ease: 'power2.out'
+            },
+            '-=0.5'
+          )
+      
+          // The `y: 10` has been removed from this animation to ensure `position: fixed` works on mobile
+          .to(
+            '.header',
+            {
+              opacity: 1,
+              duration: 1,
+              ease: 'power3.out'
+            },
+            '-=1.0'
+          )
+      
+        function updateCards() {
+          gsap.to('.product-card', { opacity: 0, y: -20, duration: 0.3 })
+          const activeCard = document.querySelector('.swiper-slide-active .product-card')
+          if (activeCard) {
+            gsap.to(activeCard, { opacity: 1, y: 0, duration: 0.5, delay: 0.1, ease: 'power2.out' })
+          }
+        }
+      
+        // 4. View Details Interaction
+        document.body.addEventListener('click', (e) => {
+          if (e.target.closest('.btn-add')) {
+            const slide = e.target.closest('.swiper-slide')
+            window.PeakCart.add({
+              product_type: 'boot',
+              product_id: slide.dataset.id,
+              name: slide.dataset.name,
+              tag: slide.dataset.tag,
+              price: parseFloat(slide.dataset.price),
+              image: slide.dataset.image
+            })
+          }
+      
+          if (e.target.closest('.btn-buy')) {
+            const slide = e.target.closest('.swiper-slide')
+            window.PeakCart.add({
+              product_type: 'boot',
+              product_id: slide.dataset.id,
+              name: slide.dataset.name,
+              tag: slide.dataset.tag,
+              price: parseFloat(slide.dataset.price),
+              image: slide.dataset.image
+            })
+            window.PeakCart.open()
+          }
+      
+          if (e.target.closest('.buy-btn')) {
+            const btn = e.target.closest('.buy-btn')
+            const slide = btn.closest('.swiper-slide')
+      
+            if (!slide.classList.contains('swiper-slide-active')) return
+      
+            const imgWrapper = slide.querySelector('.image-wrapper')
+            const detailPanel = slide.querySelector('.detail-panel')
+            const detailInfo = slide.querySelector('.detail-info')
+            const productCard = slide.querySelector('.product-card')
+            const closeBtn = slide.querySelector('.btn-close')
+      
+            const imgShrinkHeight = isMobile ? '30%' : '45%'
+            const imgShrinkWidth = isMobile ? '95%' : '85%'
+            const imgShrinkY = isMobile ? -60 : -45
+      
+            gsap.to(imgWrapper, { height: imgShrinkHeight, width: imgShrinkWidth, yPercent: imgShrinkY, borderRadius: '12px', duration: 0.6, ease: 'expo.inOut' })
+      
+            gsap.to(productCard, { opacity: 0, y: -20, duration: 0.3, pointerEvents: 'none', ease: 'power1.out' })
+            gsap.to(detailPanel, { opacity: 1, pointerEvents: 'auto', duration: 0.5, delay: 0.15, ease: 'power2.out' })
+            gsap.to(closeBtn, { opacity: 1, pointerEvents: 'auto', duration: 0.4, delay: 0.25, ease: 'power2.out' })
+            gsap.to(detailInfo, { opacity: 1, y: 0, duration: 0.5, delay: 0.35, ease: 'power2.out' })
+      
+            swiper.params.allowTouchMove = false
+          }
+      
+          if (e.target.closest('.btn-close')) {
+            const btn = e.target.closest('.btn-close')
+            const slide = btn.closest('.swiper-slide')
+      
+            const imgWrapper = slide.querySelector('.image-wrapper')
+            const detailPanel = slide.querySelector('.detail-panel')
+            const detailInfo = slide.querySelector('.detail-info')
+            const productCard = slide.querySelector('.product-card')
+            const closeBtn = slide.querySelector('.btn-close')
+      
+            gsap.to(imgWrapper, { height: '100%', width: '100%', yPercent: 0, borderRadius: '0px', duration: 0.6, ease: 'expo.inOut' })
+      
+            gsap.to(closeBtn, { opacity: 0, pointerEvents: 'none', duration: 0.25, ease: 'power1.out' })
+            gsap.to(detailInfo, { opacity: 0, y: 20, duration: 0.3 })
+            gsap.to(detailPanel, { opacity: 0, pointerEvents: 'none', duration: 0.4, delay: 0.1 })
+      
+            gsap.to(productCard, { opacity: 1, y: 0, duration: 0.5, delay: 0.3, pointerEvents: 'auto' })
+      
+            swiper.params.allowTouchMove = true
+          }
+        })
+      
+        // 5. Main carousel arrow controls for mobile card scrolling
+        const leftCardArrow = document.querySelector('.left-card-arrow')
+        const rightCardArrow = document.querySelector('.right-card-arrow')
+      
+        if (leftCardArrow && rightCardArrow) {
+          leftCardArrow.addEventListener('click', () => swiper.slidePrev())
+          rightCardArrow.addEventListener('click', () => swiper.slideNext())
+        }
+      })
+    </script>
+    {% include 'advanced/cart.html' %}
+  </body>
+</html>

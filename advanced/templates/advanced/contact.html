@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CONTACT & LABS — Peak Theory</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="csrf-token" content="{{ csrf_token }}">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-dark: #050505;
+    --bg-darker: #000000;
+    --accent: #ff4d00; /* Signature Reddish Accent */
+    --neon-dim: #a6cc2e; /* Added Pro Touch Color */
+    --text-white: #f5f5f7;
+    --text-gray: #86868b;
+    --grid-line: rgba(255, 255, 255, 0.06);
+    --card-bg: rgba(255, 255, 255, 0.015);
+    --transition-smooth: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* HARD BOUNDARY STABILITY PREVENTING HORIZONTAL SCROLL */
+  *, *::before, *::after { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+  }
+  
+  html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+    position: relative;
+    scroll-behavior: smooth;
+    background-color: var(--bg-dark); 
+    color: var(--text-white);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  
+  /* Custom Scrollbar for Pro Feel */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-darker); }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--neon-dim); }
+
+  /* GLOBAL UTILITIES & BACKGROUND MATRIX */
+  .grid-bg-overlay {
+    position: fixed;
+    inset: 0;
+    background: 
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 60px 60px;
+    z-index: 1;
+    pointer-events: none;
+    mask-image: radial-gradient(ellipse at 50% 0%, black 10%, transparent 80%);
+  }
+  
+  /* Subtle Atmospheric Glows */
+  .ambient-glow {
+    position: absolute; width: 60vw; height: 60vw;
+    background: radial-gradient(circle, rgba(166, 204, 46, 0.03) 0%, transparent 60%);
+    top: -20%; left: -20%; z-index: 1; pointer-events: none;
+  }
+  .ambient-glow-right {
+    position: absolute; width: 50vw; height: 50vw;
+    background: radial-gradient(circle, rgba(255, 77, 0, 0.04) 0%, transparent 60%);
+    bottom: 20%; right: -10%; z-index: 1; pointer-events: none;
+  }
+
+  /* HEADER */
+  .header {
+    position: fixed; top: 2rem; left: 3vw; width: calc(100% - 6vw);
+    padding: 1rem 1.6rem; display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.76rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    z-index: 100; border: 1px solid rgba(255, 255, 255, 0); border-radius: 2rem;
+    background: rgba(5, 5, 5, 0); transition: var(--transition-smooth);
+    color: var(--text-white);
+  }
+  .header.docked {
+    top: 1rem; left: 50%; width: min(700px, 92vw); transform: translateX(-50%);
+    padding: 0.8rem 1.8rem; background: rgba(5, 5, 5, 0.7);
+    border-color: #f4f3ef; border-radius: 999px;
+    backdrop-filter: blur(24px) saturate(180%);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  }
+  .header a { color: var(--text-gray); text-decoration: none; transition: color 0.3s ease; position: relative; }
+  .header a::after {
+    content: ''; position: absolute; width: 100%; transform: scaleX(0); height: 1px;
+    bottom: -4px; left: 0; background: var(--neon-dim); transform-origin: bottom right; transition: transform 0.4s cubic-bezier(0.86, 0, 0.07, 1);
+  }
+  .header a:hover { color: var(--text-white); }
+  .header a:hover::after { transform: scaleX(1); transform-origin: bottom left; }
+  .header a.active { color: var(--text-white); }
+  .header a.active::after { transform: scaleX(1); background: var(--accent); }
+
+  .header .logo {
+    color: var(--text-white); font-family: 'Montserrat', sans-serif; font-weight: 900;
+    font-size: 1.25rem; letter-spacing: 0.04em; display: flex; align-items: center; gap: 0.5rem;
+    white-space: nowrap;
+  }
+  .header .logo .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .header .center-nav { display: flex; gap: 2.5rem; }
+  .mobile-contact-link { display: none; }
+  
+  @media (max-width: 800px) {
+    .header {
+      top: 1rem;
+      left: 50%;
+      right: auto;
+      width: 90vw;
+      max-width: 100%;
+      transform: translateX(-50%);
+      padding: 0.7rem 1rem;
+      background: transparent;
+      border: none;
+      backdrop-filter: none;
+      box-shadow: none;
+      
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 1.2rem;
+      
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .header::-webkit-scrollbar { 
+      display: none; 
+    }
+
+    .header.docked {
+      top: auto;
+      bottom: 1.2rem;
+      width: 90vw;
+      max-width: 100%;
+      padding: 0.7rem 1rem;
+      
+      background: rgba(5, 5, 5, 0.9);
+      border: 1px solid rgba(245, 245, 247, 0.88);
+      border-radius: 1.2rem;
+      backdrop-filter: blur(20px) saturate(160%);
+      box-shadow: 0 0 0 1px rgba(245, 245, 247, 0.22), 0 10px 30px rgba(0, 0, 0, 0.22);
+      
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 0.6rem;
+      overflow-x: visible;
+    }
+
+    .header .logo {
+      font-size: 1.05rem;
+      width: auto;
+      margin: 0;
+      flex-shrink: 0;
+    }
+    .header.docked .logo {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .header .center-nav {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 1.2rem;
+      width: auto;
+      margin: 0;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .header.docked .center-nav {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+      gap: 1.2rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .header.docked .center-nav::-webkit-scrollbar { 
+      display: none; 
+    }
+
+    .header .center-nav a {
+      font-size: 0.68rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .desktop-contact { display: none; }
+    .mobile-contact-link { display: inline-block; flex-shrink: 0; }
+  }
+
+  /* HERO BANNER SECTION */
+  .hero-section {
+    position: relative; 
+    min-height: 50vh; 
+    padding: 12rem 5vw 4rem;
+    display: flex; 
+    flex-direction: column; 
+    justify-content: flex-end;
+    border-bottom: 1px solid var(--grid-line); 
+    z-index: 2; 
+    overflow: hidden;
+    width: 100%;
+  }
+  .hero-tag {
+    font-size: 0.75rem; color: var(--neon-dim); font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.3em; margin-bottom: 1rem; display: block;
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  .hero-content-wrap {
+    position: relative;
+    width: min(840px, 100%);
+    padding: 0.8rem 0 1.2rem;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(64px);
+    filter: blur(14px);
+  }
+  .hero-content-wrap::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent), transparent 72%);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .hero-title {
+    font-family: 'Syne', sans-serif; font-size: clamp(2.4rem, 7vw, 6.5rem);
+    text-transform: uppercase; line-height: 0.9; letter-spacing: -0.03em;
+    overflow: hidden;
+    word-break: break-word;
+  }
+  .hero-title .accent-word,
+  .hero-title .title-rest {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(30px);
+    filter: blur(12px);
+    will-change: transform, opacity, filter;
+  }
+  .hero-title .accent-word {
+    color: var(--accent);
+  }
+
+  .form-reveal,
+  .hub-reveal {
+    opacity: 0;
+    transform: translateY(36px);
+    will-change: transform, opacity, filter;
+  }
+
+  /* MAIN LAYOUT WRAPPER */
+  .main-layout { 
+    display: grid; 
+    grid-template-columns: 1.2fr 0.8fr; 
+    width: 100%; 
+    z-index: 2; 
+    position: relative; 
+  }
+  @media (max-width: 1024px) { 
+    .main-layout { grid-template-columns: 1fr; } 
+  }
+
+  /* CONTACT TERMINAL (LEFT BLOCK) */
+  .contact-terminal { 
+    padding: 6vw 5vw; 
+    border-right: 1px solid var(--grid-line); 
+    background: rgba(0,0,0,0.2); 
+    width: 100%;
+  }
+  @media (max-width: 1024px) { 
+    .contact-terminal { border-right: none; border-bottom: 1px solid var(--grid-line); } 
+  }
+
+  .section-label {
+    font-size: 0.7rem; color: var(--text-gray); font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.2em; margin-bottom: 3rem; display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::before { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; flex-shrink: 0; }
+
+  .input-group { position: relative; margin-bottom: 3.5rem; width: 100%; }
+  .input-field {
+    width: 100%; background: transparent; border: none;
+    border-bottom: 1px solid #f4f3ef; padding: 1rem 0;
+    font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem;
+    color: #f4f3ef; outline: none; transition: border-color 0.4s;
+    border-radius: 0;
+  }
+  .input-field:-webkit-autofill { -webkit-text-fill-color: var(--text-white) !important; box-shadow: 0 0 0px 1000px var(--bg-dark) inset !important; }
+  .floating-label {
+    position: absolute; top: 1rem; left: 0; pointer-events: none;
+    color: #f4f3ef; font-size: 0.95rem; text-transform: uppercase;
+    letter-spacing: 0.1em; transition: var(--transition-smooth);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+  }
+  .input-field:focus ~ .floating-label, .input-field:not(:placeholder-shown) ~ .floating-label {
+    top: -1.2rem; font-size: 0.75rem; color: var(--neon-dim); letter-spacing: 0.15em;
+  }
+  .input-line {
+    position: absolute; bottom: 0; left: 0; width: 0; height: 2px;
+    background-color: var(--neon-dim); transition: width var(--transition-smooth);
+    max-width: 100%;
+  }
+  .input-field:focus ~ .input-line { width: 100%; }
+
+  /* RADIO TERMINAL MATRIX FOR DEPT */
+  .radio-matrix-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-white); margin-bottom: 1.2rem; font-weight: 600; }
+  .radio-matrix { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); 
+    gap: 1rem; 
+    margin-bottom: 3.5rem; 
+    width: 100%;
+  }
+  .radio-option { position: relative; cursor: pointer; }
+  .radio-option input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .radio-custom {
+    padding: 1rem 0.5rem; border: 1px solid #f4f3ef; background: var(--card-bg);
+    display: block; text-align: center; font-size: 0.75rem; text-transform: uppercase;
+    letter-spacing: 0.05em; transition: var(--transition-smooth); border-radius: 4px; color: #f4f3ef;
+  }
+  .radio-option:hover .radio-custom { border-color: rgba(255, 255, 255, 0.2); }
+  .radio-option input:checked + .radio-custom {
+    border-color: var(--neon-dim); color: var(--bg-darker);
+    background: var(--neon-dim); box-shadow: 0 0 20px rgba(166, 204, 46, 0.2); font-weight: 700;
+  }
+
+  .dispatch-btn {
+    background: transparent; border: 1px solid var(--accent); color: var(--text-white);
+    padding: 1.2rem 2.5rem; font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; cursor: pointer;
+    font-size: 0.8rem; transition: var(--transition-smooth);
+    display: inline-flex; align-items: center; justify-content: center; gap: 15px; overflow: hidden; position: relative; border-radius: 4px;
+    max-width: 100%;
+  }
+  .dispatch-btn::before {
+    content: ''; position: absolute; inset: 0; background: var(--accent);
+    transform: translateX(-101%); transition: transform var(--transition-smooth); z-index: -1;
+  }
+  .dispatch-btn:hover { color: var(--bg-darker); border-color: var(--accent); box-shadow: 0 10px 30px rgba(255, 77, 0, 0.3); }
+  .dispatch-btn:hover::before { transform: translateX(0); }
+  .dispatch-btn svg { fill: currentColor; transition: transform 0.3s; flex-shrink: 0; }
+  .dispatch-btn:hover svg { transform: translateX(5px); }
+  .dispatch-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  /* GLOBAL NODES HUB (RIGHT BLOCK) */
+  .nodes-hub { padding: 6vw 5vw; background: var(--bg-darker); display: flex; flex-direction: column; justify-content: flex-start; width: 100%; }
+  .node-entry {
+    border: 1px solid var(--grid-line); padding: 2.5rem 1.5rem; margin-bottom: 1.5rem;
+    background: linear-gradient(145deg, rgba(255,255,255,0.02), rgba(0,0,0,0));
+    border-radius: 8px; transition: var(--transition-smooth); position: relative; overflow: hidden;
+    width: 100%;
+  }
+  .node-entry::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+    background: var(--grid-line); transition: var(--transition-smooth);
+  }
+  .node-entry:hover { border-color: rgba(166, 204, 46, 0.3); transform: translateY(-4px); box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+  .node-entry:hover::before { background: var(--neon-dim); }
+
+  .node-status { position: absolute; top: 2.5rem; right: 1.5rem; display: flex; align-items: center; gap: 8px; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--neon-dim); font-weight: 600;}
+  .ping-dot { width: 6px; height: 6px; background: var(--neon-dim); border-radius: 50%; position: relative; }
+  .ping-dot::after {
+    content: ''; position: absolute; inset: -4px; border: 1px solid var(--neon-dim);
+    border-radius: 50%; opacity: 0; animation: wavePulse 2s infinite cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes wavePulse { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
+
+  .node-title { font-family: 'Syne', sans-serif; font-size: clamp(1.2rem, 3vw, 1.6rem); text-transform: uppercase; margin-bottom: 0.2rem; word-break: break-word; }
+  .node-geo { font-size: 0.75rem; color: var(--text-gray); margin-bottom: 2rem; letter-spacing: 0.05em; word-break: break-word; }
+  .node-clock { font-size: clamp(1.8rem, 5vw, 2.5rem); font-weight: 300; letter-spacing: 0.02em; color: var(--text-white); font-variant-numeric: tabular-nums; }
+
+  /* FIELD-TEST MATRIX (REVIEWS) SECTION */
+  .reviews-section { border-top: 1px solid var(--grid-line); padding: 6rem 5vw; position: relative; z-index: 2; background: var(--bg-dark); width: 100%; }
+  .reviews-header-block { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4rem; flex-wrap: wrap; gap: 2rem; }
+  .reviews-stats-summary { display: flex; gap: 2rem; border: 1px solid var(--grid-line); padding: 1.2rem 2rem; background: var(--card-bg); border-radius: 8px; backdrop-filter: blur(10px); max-width: 100%; }
+  .summary-stat-val { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 4vw, 2.5rem); color: var(--neon-dim); line-height: 1; }
+  .summary-stat-lbl { font-size: 0.65rem; color: var(--text-gray); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.5rem; }
+
+  /* FILTER TAB BAR */
+  .matrix-filters { display: flex; gap: 1.5rem; border-bottom: 1px solid var(--grid-line); padding-bottom: 1rem; margin-bottom: 3rem; overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch; }
+  .filter-btn {
+    background: transparent; border: none; color: var(--text-gray);
+    font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.15em; cursor: pointer; padding: 0.5rem 0;
+    transition: color 0.3s; position: relative; white-space: nowrap; flex-shrink: 0;
+  }
+  .filter-btn.active { color: var(--text-white); }
+  .filter-btn::after {
+    content: ''; position: absolute; bottom: -1rem; left: 0; width: 100%; height: 2px;
+    background: var(--neon-dim); transform: scaleX(0); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); transform-origin: center;
+  }
+  .filter-btn.active::after, .filter-btn:hover::after { transform: scaleX(1); }
+
+  /* REVIEWS MASONRY / GRID */
+  .reviews-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+    gap: 1.5rem; 
+    width: 100%;
+  }
+  .review-card {
+    border: 1px solid var(--grid-line); background: linear-gradient(180deg, var(--card-bg) 0%, transparent 100%);
+    padding: 2rem 1.5rem; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;
+    min-height: 300px; transition: var(--transition-smooth); width: 100%;
+  }
+  .review-card:hover { border-color: rgba(255, 77, 0, 0.4); background: linear-gradient(180deg, rgba(255, 77, 0, 0.03) 0%, transparent 100%); transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+  
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; gap: 0.5rem; }
+  .asset-tag { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 0.4rem 0.8rem; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; color: var(--text-white); background: rgba(255,255,255,0.03); }
+  
+  /* HIGH TECH METRIC RATING BAR REPRESENTATION */
+  .telemetry-rating { display: flex; flex-direction: column; gap: 6px; width: 80px; flex-shrink: 0; }
+  .telemetry-label { font-size: 0.55rem; text-transform: uppercase; color: var(--neon-dim); letter-spacing: 0.05em; font-weight: 700; text-align: right; }
+  .telemetry-bars { display: flex; gap: 3px; justify-content: flex-end; }
+  .t-bar { width: 8px; height: 4px; background: #f4f3ef; border-radius: 2px; opacity: 0.28; }
+  .t-bar.fill { background: var(--accent); box-shadow: 0 0 8px rgba(255, 77, 0, 0.5); }
+
+  .review-body { font-size: 0.95rem; line-height: 1.6; color: rgba(255,255,255,0.85); margin-bottom: 2rem; flex-grow: 1; font-weight: 300;}
+  
+  .reviewer-identity { border-top: 1px solid var(--grid-line); padding-top: 1.2rem; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+  .reviewer-name { font-family: 'Syne', sans-serif; font-size: 1rem; text-transform: uppercase; color: var(--text-white); }
+  .reviewer-rank { font-size: 0.65rem; text-transform: uppercase; color: var(--text-gray); letter-spacing: 0.05em; margin-top: 0.2rem; }
+  .verified-node { font-size: 0.6rem; color: var(--neon-dim); font-weight: 700; letter-spacing: 0.1em; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .verified-node::before { content: ''; width: 4px; height: 4px; background: var(--neon-dim); border-radius: 50%; }
+
+  /* SUBMIT REVIEW HUB BLOCK */
+  .review-trigger-panel {
+    margin-top: 4rem; border: 1px dashed rgba(166, 204, 46, 0.3); padding: 3rem 1.5rem;
+    text-align: center; border-radius: 12px; background: radial-gradient(circle, rgba(166, 204, 46, 0.02) 0%, transparent 60%);
+    transition: var(--transition-smooth); width: 100%;
+  }
+  .review-trigger-panel:hover { background: radial-gradient(circle, rgba(166, 204, 46, 0.05) 0%, transparent 70%); border-color: var(--neon-dim); }
+  .trigger-title { font-family: 'Syne', sans-serif; font-size: clamp(1.5rem, 4vw, 2.2rem); text-transform: uppercase; margin-bottom: 1rem; }
+  .trigger-desc { font-size: 0.9rem; color: var(--text-gray); max-width: 540px; margin: 0 auto 2rem; line-height: 1.6; }
+  
+  /* CRITIQUE MODAL OVERLAY */
+  .critique-modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px);
+    z-index: 300; display: grid; place-items: center; opacity: 0; pointer-events: none;
+    transition: opacity 0.5s ease; padding: 1rem; width: 100vw; height: 100vh;
+  }
+  .critique-modal.active { opacity: 1; pointer-events: auto; }
+  .modal-box {
+    background: var(--bg-darker); border: 1px solid var(--grid-line); width: 100%; max-width: 550px;
+    padding: 2.5rem 1.5rem; border-radius: 12px; position: relative; box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+    transform: translateY(30px); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: 90vh; overflow-y: auto;
+  }
+  .critique-modal.active .modal-box { transform: translateY(0); }
+  .close-modal-btn {
+    position: absolute; top: 1rem; right: 1.2rem; background: transparent; border: none;
+    color: var(--text-gray); font-size: 2rem; cursor: pointer; transition: color 0.3s; line-height: 1;
+  }
+  .close-modal-btn:hover { color: var(--neon-dim); }
+  
+  /* MATRIX STARS LOGIC RENDER */
+  .rating-selector { display: flex; gap: 8px; margin: 1rem 0 2.5rem; width: 100%; }
+  .rate-node {
+    flex: 1; height: 8px; border: 1px solid var(--grid-line); background: transparent;
+    cursor: pointer; transition: var(--transition-smooth); border-radius: 2px;
+  }
+  .rate-node.selected, .rate-node:hover { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 12px rgba(255, 77, 0, 0.4); }
+
+  /* SITE FOOTER */
+  .site-footer {
+    background: var(--bg-darker); color: var(--text-white); padding: 5rem 5vw 2rem;
+    border-top: 1px solid var(--grid-line); position: relative; overflow: hidden; z-index: 5;
+    width: 100%;
+  }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 3rem; margin-bottom: 4rem; width: 100%; }
+  .footer-brand { display: flex; flex-direction: column; align-items: flex-start; }
+  .footer-logo {
+    font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 1.3rem;
+    letter-spacing: 0.02em; display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.2rem;
+  }
+  .footer-logo .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .footer-desc { font-size: 0.88rem; line-height: 1.6; color: var(--text-gray); max-width: 34ch; font-weight: 300;}
+  .footer-col h4 { font-size: 0.75rem; letter-spacing: 0.2em; color: var(--neon-dim); margin-bottom: 1.2rem; text-transform: uppercase; font-weight: 700;}
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.8rem; }
+  .footer-col a { font-size: 0.88rem; color: var(--text-gray); transition: color 0.3s ease; text-decoration: none; }
+  .footer-col a:hover { color: var(--text-white); }
+  
+  .footer-bottom-marquee { 
+    width: 100%; 
+    border-top: 1px solid var(--grid-line); 
+    padding-top: 2.5rem; 
+    text-align: center; 
+    overflow: hidden; 
+  }
+  
+  .huge-text {
+    font-family: 'Montserrat', sans-serif; 
+    font-weight: 900; 
+    font-size: clamp(2rem, 11vw, 8.5rem);
+    line-height: 0.85; 
+    letter-spacing: -0.04em; 
+    margin-bottom: 2rem; 
+    display: block;
+    width: 100%;
+    word-break: break-all;
+  }
+  .huge-text .red { color: var(--accent); }
+  .huge-text .neon { color: var(--neon-dim); }
+  .footer-legal { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-size: 0.7rem; color: var(--text-gray); text-transform: uppercase; font-weight: 600;}
+  .footer-legal-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  .footer-legal-links a { color: var(--text-gray); text-decoration: none; transition: 0.3s; }
+  .footer-legal-links a:hover { color: var(--neon-dim); }
+
+  @media (max-width: 1024px) { 
+    .footer-grid { grid-template-columns: 1fr 1fr; gap: 2.5rem; } 
+  }
+  @media (max-width: 600px) { 
+    .footer-grid { grid-template-columns: 1fr; gap: 2rem; } 
+    .footer-legal { flex-direction: column; align-items: flex-start; } 
+  }
+</style>
+</head>
+<body>
+
+  <div class="grid-bg-overlay"></div>
+  <div class="ambient-glow"></div>
+  <div class="ambient-glow-right"></div>
+
+  <!-- FIXED NAVIGATION HEADER -->
+  <header class="header" id="mainHeader">
+    <a class="logo" href="/"><span class="dot"></span> PEAK THEORY</a>
+    <nav class="center-nav">
+      <a href="/products">BALLS</a>
+      <a href="/collection">BOOTS</a>
+      <a href="/lab">LAB</a>
+      <a href="/quality">QUALITY</a>
+      <a href="#" class="mobile-contact-link active">CONTACT</a>
+    </nav>
+    <div class="desktop-contact"><a href="#" class="active">CONTACT</a></div>
+  </header>
+
+  <!-- ANCHOR/HERO HEADER -->
+  <section class="hero-section">
+    <div class="hero-content-wrap">
+      <span class="hero-tag">System Interface // Global Nodes</span>
+      <h1 class="hero-title">
+        <span class="accent-word">Telemetry</span>
+        <span class="title-rest">&</span><br>
+        <span class="title-rest">Feedback Matrix</span>
+      </h1>
+    </div>
+  </section>
+
+  <!-- RE-ARCHITECTED CONTACT ARCHITECTURE -->
+  <main class="main-layout">
+    
+    <!-- SIGNAL DISPATCH FORM (LEFT) -->
+    <section class="contact-terminal">
+      <div class="section-label">Transmit Telemetry Signal</div>
+      
+      <form id="lab-contact-form" onsubmit="event.preventDefault(); return handleFormSubmit();">
+        <div class="input-group form-reveal">
+          <input type="text" class="input-field" placeholder=" " required id="form-name">
+          <label class="floating-label">Operator / Full Identifier</label>
+          <div class="input-line"></div>
+        </div>
+
+        <div class="input-group form-reveal">
+          <input type="email" class="input-field" placeholder=" " required id="form-email">
+          <label class="floating-label">Network / Digital Relay Address</label>
+          <div class="input-line"></div>
+        </div>
+
+        <!-- MATRIX SELECTION RANGE -->
+        <div class="radio-matrix-title form-reveal">Target Division Routing</div>
+        <div class="radio-matrix form-reveal">
+          <label class="radio-option">
+            <input type="radio" name="dept" value="Lab Testing" checked>
+            <span class="radio-custom">Lab Stress-Testing</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="dept" value="Custom Builds">
+            <span class="radio-custom">Custom Build Orders</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="dept" value="Aerodynamics">
+            <span class="radio-custom">Aero Dynamics</span>
+          </label>
+        </div>
+
+        <div class="input-group form-reveal">
+          <input type="text" class="input-field" placeholder=" " required id="form-msg">
+          <label class="floating-label">Transmission Brief / Payload Requirements</label>
+          <div class="input-line"></div>
+        </div>
+
+        <button type="submit" class="dispatch-btn form-reveal" id="dispatchBtn">
+          <span>Dispatch Signal</span>
+          <svg width="18" height="18" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </form>
+    </section>
+
+    <!-- METRIC RESEARCH ACTIVE LAB CLOCKS (RIGHT) -->
+    <section class="nodes-hub">
+      <div class="section-label">Active Structural Design Centers</div>
+
+      <!-- Node Alpha -->
+      <div class="node-entry hub-reveal" data-tz="America/Los_Angeles">
+        <div class="node-status"><span class="ping-dot"></span> Online</div>
+        <div class="node-title">PAKISTAN Lab</div>
+        <div class="node-geo">45.5152° N, 122.6784° W // Core Aerodynamic Tunnel</div>
+        <div class="node-clock" id="clock-pdx">00:00:00</div>
+      </div>
+
+      <!-- Node Beta -->
+      <div class="node-entry hub-reveal" data-tz="Europe/Berlin">
+        <div class="node-status"><span class="ping-dot"></span> Online</div>
+        <div class="node-title">Munich Center</div>
+        <div class="node-geo">48.1351° N, 11.5820° E // Kinetic Ply Adhesion Press</div>
+        <div class="node-clock" id="clock-muc">00:00:00</div>
+      </div>
+
+      <!-- Node Gamma -->
+      <div class="node-entry hub-reveal" data-tz="Asia/Tokyo">
+        <div class="node-status"><span class="ping-dot"></span> Online</div>
+        <div class="node-title">Tokyo Matrix</div>
+        <div class="node-geo">35.6762° N, 139.6503° E // Thermal Shell Synthesis</div>
+        <div class="node-clock" id="clock-tky">00:00:00</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ADVANCED ATHLETE FIELD-TEST ENGINE (REVIEWS) -->
+  <section class="reviews-section">
+    <div class="reviews-header-block">
+      <div>
+        <div class="section-label">Athlete Feedback Logs</div>
+        <h2 class="hero-title" style="font-size: clamp(2rem, 4vw, 3.5rem)">Field Test Reports</h2>
+      </div>
+      
+      <!-- Live Metrics Engine Interface Counters -->
+      <div class="reviews-stats-summary">
+        <div>
+          <div class="summary-stat-val" id="summaryAvg">4.9</div>
+          <div class="summary-stat-lbl">Aggregate Score</div>
+        </div>
+        <div>
+          <div class="summary-stat-val" id="summaryCount">4</div>
+          <div class="summary-stat-lbl">Verified Reports</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTER BUTTON ARCHITECTURE -->
+    <div class="matrix-filters">
+      <button class="filter-btn active" onclick="filterReviews('ALL', this)">All Specs</button>
+      <button class="filter-btn" onclick="filterReviews('BOOTS', this)">Proxima Elite Boots</button>
+      <button class="filter-btn" onclick="filterReviews('BALLS', this)">Apex Match Balls</button>
+    </div>
+
+    <!-- CARDS CONTAINER RENDER -->
+    <div class="reviews-grid" id="reviewsGrid">
+      
+      <div class="review-card" data-category="BOOTS">
+        <div class="card-top">
+          <span class="asset-tag">Proxima Elite Boots</span>
+          <div class="telemetry-rating">
+            <span class="telemetry-label">Traction Dev</span>
+            <div class="telemetry-bars">
+              <div class="t-bar fill"></div><div class="t-bar fill"></div><div class="t-bar fill"></div><div class="t-bar fill"></div><div class="t-bar fill"></div>
+            </div>
+          </div>
+        </div>
+        <p class="review-body">"The bladed alignment matrix provides instantaneous deceleration grip inside damp grounds. Zero slippage recorded throughout 90-minute high-torque agility profiles."</p>
+        <div class="reviewer-identity">
+          <div>
+            <div class="reviewer-name">Marcus Vance</div>
+            <div class="reviewer-rank">Elite Winger / Series Tier I</div>
+          </div>
+          <span class="verified-node">Node.PDX</span>
+        </div>
+      </div>
+
+      <div class="review-card" data-category="BALLS">
+        <div class="card-top">
+          <span class="asset-tag">Apex Match Balls</span>
+          <div class="telemetry-rating">
+            <span class="telemetry-label">Flight Dev</span>
+            <div class="telemetry-bars">
+              <div class="t-bar fill"></div><div class="t-bar fill"></div><div class="t-bar fill"></div><div class="t-bar fill"></div><div class="t-bar fill"></div>
+            </div>
+          </div>
+        </div>
+        <p class="review-body">"Aerodynamic tracking shows strict trajectory compliance. Even during deep biomechanical long-range strikes, the knuckling bias is effectively neutralized by the casing patterns."</p>
+        <div class="reviewer-identity">
+          <div>
+            <div class="reviewer-name">Elena Rostova</div>
+            <div class="reviewer-rank">Midfield Strategist / Pro Flight</div>
+          </div>
+          <span class="verified-node">Node.MUC</span>
+        </div>
+      </div>
+
+      <div class="review-card" data-category="BOOTS">
+        <div class="card-top">
+          <span class="asset-tag">Proxima Elite Boots</span>
+          <div class="telemetry-rating">
+            <span class="telemetry-label">Mass Index</span>
+            <div class="telemetry-bars">
+              <div class="t-bar fill"></div><div class="t-bar fill"></div><div class="t-bar fill"></div><div class="t-bar fill"></div><div class="t-bar"></div>
+            </div>
+          </div>
+        </div>
+        <p class="review-body">"Extremely lightweight formulation reduces kinetic fatigue. Ply adhesion configuration molds completely to native midfoot dynamics within three calibration sessions."</p>
+        <div class="reviewer-identity">
+          <div>
+            <div class="reviewer-name">Jin-Woo Park</div>
+            <div class="reviewer-rank">Fullback / Olympic Contingent</div>
+          </div>
+          <span class="verified-node">Node.TKY</span>
+        </div>
+      </div>
+
+      <div class="review-card" data-category="BALLS">
+        <div class="card-top">
+          <span class="asset-tag">Apex Match Balls</span>
+          <div class="telemetry-rating">
+            <span class="telemetry-label">Elastic Limit</span>
+            <div class="telemetry-bars">
+              <div class="t-bar fill"></div><div class="t-bar fill"></div><div class="t-bar fill"></div><div class="t-bar fill"></div><div class="t-bar fill"></div>
+            </div>
+          </div>
+        </div>
+        <p class="review-body">"Retains calibrated compression boundary limits flawlessly across severe shifts in thermal vectors. Waterproof seams protect uniform velocity ratios completely."</p>
+        <div class="reviewer-identity">
+          <div>
+            <div class="reviewer-name">Coach D. Thorne</div>
+            <div class="reviewer-rank">Performance Director / Tech Club</div>
+          </div>
+          <span class="verified-node">Node.MUC</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- DYNAMIC LOG LOGIC LAUNCH BUTTON -->
+    <div class="review-trigger-panel">
+      <h3 class="trigger-title">Contribute Lab Evaluation Data</h3>
+      <p class="trigger-desc">Are you a verified field-tester or contracted athlete? Upload your technical telemetry performance diagnostics matrix into our public ledger.</p>
+      <button class="dispatch-btn" style="background: var(--neon-dim); color: var(--bg-darker); border-color: var(--neon-dim);" onclick="toggleModal(true)">
+        <span>Launch Evaluation Portal</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- CRITIQUE SUBMISSION DIALOG -->
+  <div class="critique-modal" id="critiqueModal">
+    <div class="modal-box">
+      <button class="close-modal-btn" onclick="toggleModal(false)">&times;</button>
+      <h3 class="trigger-title" style="margin-bottom: 2rem; color: var(--neon-dim);">Log Lab Evaluation</h3>
+      
+      <form id="reviewSubmitForm" onsubmit="event.preventDefault(); submitTelemetryReview();">
+        <div class="input-group">
+          <input type="text" class="input-field" placeholder=" " required id="revName">
+          <label class="floating-label">Tester Nomenclature</label>
+          <div class="input-line"></div>
+        </div>
+
+        <div class="input-group">
+          <input type="text" class="input-field" placeholder=" " required id="revRank">
+          <label class="floating-label">Professional Ranking / Affiliation</label>
+          <div class="input-line"></div>
+        </div>
+
+        <div class="radio-matrix-title" style="margin-bottom:0.8rem;">Target Build Equipment</div>
+        <div class="radio-matrix" style="margin-bottom: 2rem;">
+          <label class="radio-option">
+            <input type="radio" name="revCat" value="BOOTS" checked>
+            <span class="radio-custom">Proxima Elite Boots</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="revCat" value="BALLS">
+            <span class="radio-custom">Apex Match Balls</span>
+          </label>
+        </div>
+
+        <div>
+          <div class="radio-matrix-title" style="margin-bottom:0.8rem;">Telemetry Performance Calibration Value</div>
+          <div class="rating-selector" id="ratingSelector">
+            <div class="rate-node selected" data-score="1" onclick="setModalScore(1)"></div>
+            <div class="rate-node selected" data-score="2" onclick="setModalScore(2)"></div>
+            <div class="rate-node selected" data-score="3" onclick="setModalScore(3)"></div>
+            <div class="rate-node selected" data-score="4" onclick="setModalScore(4)"></div>
+            <div class="rate-node selected" data-score="5" onclick="setModalScore(5)"></div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <input type="text" class="input-field" placeholder=" " required id="revBody">
+          <label class="floating-label">Field Diagnostic Observation Summary</label>
+          <div class="input-line"></div>
+        </div>
+
+        <button type="submit" class="dispatch-btn" style="width: 100%; justify-content: center;" id="reviewSubmitBtn">
+          <span>Commit Diagnostics Matrix</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- PREMIUM STANDARD FLAGSHIP FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo"><span class="dot"></span>PEAK THEORY</div>
+        <p class="footer-desc">Smart, calculated performance. Built on pure data, engineered for the pitch. We strip away the noise to deliver unmatched precision in modern football equipment.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="/collection">Boots</a></li>
+          <li><a href="/products">Balls</a></li>
+          <li><a href="#">Apparel</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="/lab">The Lab</a></li>
+          <li><a href="/quality">Quality</a></li>
+          <li><a href="/contact">Contact Team</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Connect</h4>
+        <p class="footer-desc" style="margin-bottom: 1.5rem;">Join the roster for early access to drops and field tests.</p>
+        <form class="newsletter-form" onsubmit="event.preventDefault();">
+          <div class="input-group" style="margin-bottom: 1.5rem;">
+            <input type="email" class="input-field" placeholder=" " required>
+            <label class="floating-label">Enter your email</label>
+            <div class="input-line"></div>
+          </div>
+          <button type="submit" class="dispatch-btn" style="padding: 0.8rem 1.8rem; width: 100%;">Join Roster</button>
+        </form>
+      </div>
+    </div>
+    <div class="footer-bottom-marquee">
+      <div class="huge-text">PEAK <span class="neon">THEORY</span></div>
+      <div class="footer-legal">
+        <span>© 2026 Peak Theory Co. All rights reserved.</span>
+        <div class="footer-legal-links">
+          <a href="#">Terms & Conditions</a>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Shipping & Returns</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>
+    let activeModalScore = 5;
+    const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // INTRO KINETIC STAGGER ANIMATIONS ON LOAD
+      const introTl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+
+      introTl
+        .to('.hero-content-wrap', {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 1.15
+        })
+        .to('.hero-content-wrap::after', {
+          scaleX: 1,
+          duration: 0.9,
+          ease: 'power3.out'
+        }, '-=0.95')
+        .to('.hero-tag', {
+          opacity: 1,
+          y: 0,
+          duration: 0.7
+        }, '-=0.72')
+        .to('.hero-title .accent-word', {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 0.9
+        }, '-=0.55')
+        .to('.hero-title .title-rest', {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 0.95,
+          stagger: 0.12
+        }, '-=0.72')
+        .to('.form-reveal', {
+          opacity: 1,
+          y: 0,
+          duration: 0.85,
+          stagger: 0.1
+        }, '-=0.35')
+        .to('.hub-reveal', {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          stagger: 0.14
+        }, '-=0.55');
+
+      // GLOBAL NODE LAB WORLD CLOCK SYNCHRONIZATION RUNNERS
+      function syncLabClocks() {
+        const zones = {
+          'clock-pdx': 'America/Los_Angeles',
+          'clock-muc': 'Europe/Berlin',
+          'clock-tky': 'Asia/Tokyo'
+        };
+
+        for (const [domId, timeZoneStr] of Object.entries(zones)) {
+          const domEl = document.getElementById(domId);
+          if (domEl) {
+            domEl.innerText = new Date().toLocaleTimeString("en-US", {
+              timeZone: timeZoneStr,
+              hour12: false,
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit"
+            });
+          }
+        }
+      }
+      setInterval(syncLabClocks, 1000);
+      syncLabClocks();
+
+      // DOCKING NAVBAR LOGIC
+      const header = document.getElementById('mainHeader');
+      function updateHeaderState() {
+        header.classList.toggle('docked', window.scrollY > 40);
+      }
+      window.addEventListener('scroll', updateHeaderState, { passive: true });
+      updateHeaderState();
+      
+      recalculateStats();
+    });
+
+    // CONTACT FORM INTERACTIVE SUBMISSION VERIFICATION SUCCESS BLOCK
+    async function handleFormSubmit() {
+      const btn = document.getElementById('dispatchBtn');
+      const span = btn.querySelector('span');
+
+      const payload = {
+        form_type: 'contact',
+        name: document.getElementById('form-name').value,
+        email: document.getElementById('form-email').value,
+        dept: document.querySelector('input[name="dept"]:checked').value,
+        message: document.getElementById('form-msg').value
+      };
+
+      btn.disabled = true;
+      const originalText = span.innerText;
+      span.innerText = 'Transmitting...';
+
+      try {
+        const res = await fetch('/store/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRFToken': CSRF_TOKEN
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('Request failed');
+
+        gsap.to(btn, { scale: 0.95, duration: 0.1, yoyo: true, repeat: 1 });
+
+        btn.style.borderColor = 'var(--neon-dim)';
+        btn.style.color = 'var(--bg-darker)';
+        btn.style.background = 'var(--neon-dim)';
+        btn.style.boxShadow = '0 10px 30px rgba(166, 204, 46, 0.4)';
+        span.innerText = 'Signal Dispatched Successfully';
+
+        document.getElementById('lab-contact-form').reset();
+      } catch (err) {
+        btn.style.borderColor = 'var(--accent)';
+        span.innerText = 'Transmission Failed — Retry';
+      } finally {
+        setTimeout(() => {
+          btn.style = '';
+          btn.disabled = false;
+          span.innerText = originalText;
+        }, 4000);
+      }
+
+      return false;
+    }
+
+    // MATRIX CATEGORY CARD FILTER ENGINE
+    function filterReviews(category, element) {
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      element.classList.add('active');
+
+      const cards = document.querySelectorAll('.review-card');
+      
+      gsap.to(cards, {
+        opacity: 0,
+        y: 20,
+        duration: 0.3,
+        ease: 'power2.in',
+        onComplete: () => {
+          cards.forEach(card => {
+            const cardCat = card.getAttribute('data-category');
+            if (category === 'ALL' || cardCat === category) {
+              card.style.display = 'flex';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+          
+          gsap.fromTo(cards, 
+            { y: -20, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', stagger: 0.08 }
+          );
+        }
+      });
+    }
+
+    // CRITIQUE SUBMISSION DIALOG MODAL CONTROLLER
+    function toggleModal(openState) {
+      const modal = document.getElementById('critiqueModal');
+      if (openState) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      } else {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+
+    // MODAL SCORE RATING VALUE SETTER MATRIX
+    function setModalScore(scoreValue) {
+      activeModalScore = scoreValue;
+      const nodes = document.querySelectorAll('#ratingSelector .rate-node');
+      nodes.forEach((node, idx) => {
+        if (idx < scoreValue) {
+          node.classList.add('selected');
+        } else {
+          node.classList.remove('selected');
+        }
+      });
+    }
+
+    // TELEMETRY REVIEW MATRIX INJECTION SYSTEM ENGINE
+    async function submitTelemetryReview() {
+      const name = document.getElementById('revName').value;
+      const rank = document.getElementById('revRank').value;
+      const body = document.getElementById('revBody').value;
+      const category = document.querySelector('input[name="revCat"]:checked').value;
+      
+      if (!name || !rank || !body) return;
+
+      const submitBtn = document.getElementById('reviewSubmitBtn');
+      const submitSpan = submitBtn.querySelector('span');
+      const originalText = submitSpan.innerText;
+      submitBtn.disabled = true;
+      submitSpan.innerText = 'Submitting...';
+
+      try {
+        const res = await fetch('/store/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRFToken': CSRF_TOKEN
+          },
+          body: JSON.stringify({
+            form_type: 'review',
+            reviewer_name: name,
+            rank: rank,
+            revCat: category,
+            score: activeModalScore,
+            body: body
+          })
+        });
+
+        if (!res.ok) throw new Error('Request failed');
+
+        let barsMarkup = '';
+        for (let i = 1; i <= 5; i++) {
+          barsMarkup += `<div class="t-bar ${i <= activeModalScore ? 'fill' : ''}"></div>`;
+        }
+
+        const labelMap = { 'BOOTS': 'Proxima Elite Boots', 'BALLS': 'Apex Match Balls' };
+
+        const newCard = document.createElement('div');
+        newCard.className = 'review-card';
+        newCard.setAttribute('data-category', category);
+        newCard.style.opacity = '0';
+        newCard.style.transform = 'translateY(30px)';
+        newCard.innerHTML = `
+          <div class="card-top">
+            <span class="asset-tag">${labelMap[category]}</span>
+            <div class="telemetry-rating">
+              <span class="telemetry-label">Metric Matrix</span>
+              <div class="telemetry-bars">${barsMarkup}</div>
+            </div>
+          </div>
+          <p class="review-body">"${body}"</p>
+          <div class="reviewer-identity">
+            <div>
+              <div class="reviewer-name">${name}</div>
+              <div class="reviewer-rank">${rank}</div>
+            </div>
+            <span class="verified-node" data-score="${activeModalScore}">Node.VLD</span>
+          </div>
+        `;
+
+        const gridContainer = document.getElementById('reviewsGrid');
+        gridContainer.insertBefore(newCard, gridContainer.firstChild);
+
+        toggleModal(false);
+        document.getElementById('reviewSubmitForm').reset();
+        setModalScore(5);
+
+        gsap.to(newCard, { opacity: 1, y: 0, duration: 0.8, ease: 'back.out(1.5)' });
+
+        recalculateStats();
+      } catch (err) {
+        submitSpan.innerText = 'Submission Failed — Retry';
+        setTimeout(() => { submitSpan.innerText = originalText; }, 3000);
+      } finally {
+        submitBtn.disabled = false;
+        if (submitSpan.innerText === 'Submitting...') submitSpan.innerText = originalText;
+      }
+    }
+
+    // STATISTICAL RE-COMPUTATION COMPONENT MODULE ENGINE
+    function recalculateStats() {
+      const ratings = [];
+      document.querySelectorAll('.review-card').forEach(card => {
+        const fillCount = card.querySelectorAll('.t-bar.fill').length;
+        ratings.push(fillCount);
+      });
+
+      if(ratings.length === 0) return;
+      
+      const sum = ratings.reduce((total, val) => total + val, 0);
+      const average = (sum / ratings.length).toFixed(1);
+
+      gsap.to('#summaryAvg', { innerText: average, duration: 1, snap: { innerText: 0.1 }, ease: 'power2.out' });
+      gsap.to('#summaryCount', { innerText: ratings.length, duration: 1, snap: { innerText: 1 }, ease: 'power2.out' });
+    }
+  </script>
+  {% include "advanced/cart.html" %}
+</body>
+</html>

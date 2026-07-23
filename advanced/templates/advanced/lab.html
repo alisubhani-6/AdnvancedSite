@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LAB — Peak Theory Quality & Build</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Space+Grotesk:wght@300;400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-dark: #080808;
+    --bg-darker: #000000;
+    --accent: #ff4d00;
+    --text-white: #f5f5f7;
+    --text-gray: #86868b;
+    --grid-line: rgba(255, 255, 255, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    width: 100%; 
+    background-color: var(--bg-dark); 
+    color: var(--text-white);
+    overflow-x: hidden; 
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  body.intro-active { overflow: hidden; }
+
+  /* OPENING INTRO */
+  .lab-intro {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    background:
+      radial-gradient(circle at center, rgba(255, 77, 0, 0.12) 0%, rgba(255, 77, 0, 0.08) 18%, transparent 42%),
+      linear-gradient(135deg, #050505 0%, #111111 55%, #050505 100%);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .lab-intro::before,
+  .lab-intro::after {
+    content: '';
+    position: absolute;
+    inset: 7vh;
+    border: 1px solid rgba(255,255,255,0.08);
+    pointer-events: none;
+  }
+  .lab-intro::after {
+    inset: 14vh;
+    border-color: rgba(255, 77, 0, 0.22);
+  }
+  .intro-grid {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: radial-gradient(circle at center, black 0%, transparent 82%);
+    opacity: 0.5;
+    transform-origin: center;
+  }
+  .intro-card {
+    position: absolute;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    box-shadow: inset 0 0 0 1px rgba(255,77,0,0.05);
+    backdrop-filter: blur(5px);
+  }
+  .intro-card-a { width: clamp(150px, 18vw, 230px); height: clamp(150px, 18vw, 230px); top: 12vh; left: 10vw; transform: rotate(-12deg); }
+  .intro-card-b { width: clamp(120px, 15vw, 170px); height: clamp(120px, 15vw, 170px); right: 14vw; bottom: 16vh; transform: rotate(8deg); }
+  .intro-card-c { width: clamp(190px, 24vw, 260px); height: clamp(120px, 16vw, 180px); left: 50%; top: 55vh; transform: translate(-50%, -50%) rotate(2deg); }
+  .intro-center {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  .intro-pill {
+    padding: 0.6rem 1rem;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.02);
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    font-size: 0.68rem;
+    color: var(--text-gray);
+  }
+  .intro-title {
+    display: flex;
+    align-items: center;
+    gap: 0.12em;
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(5rem, 16vw, 12rem);
+    line-height: 0.84;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+  }
+  .intro-title span { display: inline-block; }
+  .intro-title span:nth-child(2) { color: var(--accent); }
+  .intro-copy {
+    font-size: 0.78rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--text-gray);
+  }
+
+  /* HEADER */
+  .header {
+    position: fixed; top: 2rem; left: 3vw; width: calc(100% - 6vw);
+    padding: 1rem 1.6rem; display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.76rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    z-index: 100; border: 1px solid rgba(255, 255, 255, 0); border-radius: 2rem;
+    background: rgba(8, 8, 8, 0); backdrop-filter: blur(0px); box-shadow: none;
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    color: var(--text-white);
+  }
+  .header.docked {
+    top: 0.8rem; left: 50%; width: min(620px, 92vw); transform: translateX(-50%);
+    padding: 0.65rem 1.4rem; background: rgba(8, 8, 8, 0.85);
+    border-color: var(--accent); border-radius: 999px;
+    backdrop-filter: blur(20px) saturate(160%);
+    box-shadow: 0 0 20px rgba(255, 77, 0, 0.2), 0 14px 40px rgba(0, 0, 0, 0.22);
+  }
+  .header a { color: var(--text-gray); text-decoration: none; transition: color 0.3s; }
+  .header a:hover, .header a.active { color: var(--text-white); }
+  .header .logo {
+    color: var(--text-white); font-family: 'Montserrat', sans-serif; font-weight: 900;
+    font-size: 1.25rem; letter-spacing: 0.04em; display: flex; align-items: center; gap: 0.5rem;
+    white-space: nowrap;
+  }
+  .header .logo .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); border: 1.5px solid var(--bg-dark); }
+  .header .center-nav { display: flex; gap: 2rem; }
+  
+  @media (max-width: 800px) {
+    .header {
+      top: 1rem !important;
+      left: 5% !important;
+      width: 90% !important;
+      transform: none !important;
+      padding: 0.55rem 0.2rem !important;
+      gap: 0.5rem !important;
+      background: transparent !important;
+      border: none !important;
+      backdrop-filter: none !important;
+      box-shadow: none !important;
+    }
+    .header .logo {
+      font-size: 1.05rem !important;
+      margin-right: 0.35rem !important;
+      flex-shrink: 0 !important;
+    }
+    .header .center-nav {
+      display: flex !important;
+      max-width: 100% !important;
+      gap: 0.45rem !important;
+      overflow-x: auto !important;
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+      margin-left: auto !important;
+      padding-left: 0.35rem !important;
+    }
+    .header .center-nav::-webkit-scrollbar {
+      display: none !important;
+    }
+    .header .center-nav a {
+      font-size: 0.62rem !important;
+      white-space: nowrap !important;
+    }
+    .header.docked {
+      top: auto !important;
+      bottom: 1.5rem !important;
+      left: 5% !important;
+      width: 90% !important;
+      transform: none !important;
+      flex-direction: column !important;
+      gap: 0.5rem !important;
+      padding: 0.8rem 1rem !important;
+      background: rgba(8, 8, 8, 0.9) !important;
+      border: 1px solid rgba(255, 77, 0, 0.85) !important;
+      border-radius: 1.2rem !important;
+      backdrop-filter: blur(20px) saturate(160%) !important;
+      box-shadow: 0 0 0 1px rgba(255, 77, 0, 0.22), 0 10px 30px rgba(0, 0, 0, 0.22) !important;
+    }
+    .header.docked .logo {
+      justify-content: center !important;
+      width: 100% !important;
+    }
+    .header.docked .center-nav {
+      justify-content: center !important;
+      width: 100% !important;
+      flex-wrap: wrap !important;
+      gap: 0.9rem !important;
+    }
+  }
+
+  /* INTERACTIVE HERO SECTION */
+  .hero-section {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background-color: var(--bg-darker);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    z-index: 15;
+  }
+  .image-trail-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 11;
+  }
+  .trail-image {
+    position: absolute;
+    width: clamp(140px, 16vw, 220px);
+    height: clamp(180px, 22vw, 290px);
+    object-fit: cover;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    border-radius: 4px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+  }
+  .hero-content {
+    position: relative;
+    z-index: 12;
+    width: 100%;
+    max-width: 1400px;
+    padding: 0 6vw;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    pointer-events: none;
+  }
+  .hero-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(5.5rem, 16vw, 14rem);
+    font-weight: 900;
+    line-height: 0.82;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    color: var(--text-white);
+    margin-bottom: 1.5rem;
+    margin-right: 4vw;
+    display: flex;
+    user-select: none;
+  }
+  .hero-title span {
+    display: inline-block;
+  }
+  .hero-title span:nth-child(2) {
+    color: var(--accent);
+  }
+  .hero-desc {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(0.85rem, 1.1vw, 1.05rem);
+    color: var(--text-gray);
+    max-width: 34ch;
+    line-height: 1.6;
+    text-align: left;
+    margin-right: 10vw;
+  }
+  .scroll-hint {
+    position: absolute;
+    right: 6vw;
+    bottom: 2.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--text-gray);
+    z-index: 14;
+  }
+  .scroll-hint .arrow {
+    width: 1.2rem;
+    height: 1.2rem;
+    border-right: 1px solid var(--accent);
+    border-bottom: 1px solid var(--accent);
+    transform: rotate(45deg);
+    display: inline-block;
+    animation: bounceDown 1.8s infinite;
+  }
+  @keyframes bounceDown {
+    0%, 100% { transform: rotate(45deg) translateY(0); }
+    50% { transform: rotate(45deg) translateY(5px); }
+  }
+
+  /* KINETIC GRID */
+  .grid-container {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: 50% 50%;
+    width: 100%; height: 100vh;
+    padding-top: 5rem; /* Account for header */
+    position: relative;
+    z-index: 10;
+  }
+
+  .quadrant {
+    position: relative;
+    border-right: 1px solid var(--grid-line);
+    border-bottom: 1px solid var(--grid-line);
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 3.5rem 3rem;
+    transition: background 0.5s ease;
+  }
+  .quadrant:nth-child(2n) { border-right: none; }
+  .quadrant:nth-child(3), .quadrant:nth-child(4) { border-bottom: none; }
+  .quadrant:hover { background: rgba(255, 77, 0, 0.03); }
+
+  /* BG IMAGE & SHADOW OVERLAY */
+  .quad-bg {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 1; filter: grayscale(100%) contrast(1.1); opacity: 0.2;
+    transition: opacity 0.6s ease, filter 0.6s ease, transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .quadrant:hover .quad-bg { opacity: 0.5; filter: grayscale(20%) contrast(1.2); transform: scale(1.08); }
+
+  @media (max-width: 900px) {
+    .quad-bg {
+      opacity: 0.48 !important;
+      filter: grayscale(26%) contrast(1.12) saturate(1.15) !important;
+    }
+    .quadrant:hover .quad-bg {
+      opacity: 0.78 !important;
+      filter: grayscale(8%) contrast(1.16) saturate(1.2) !important;
+      transform: scale(1.04) !important;
+    }
+  }
+  
+  .quad-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(180deg, rgba(8,8,8,0) 30%, rgba(8,8,8,0.98) 100%);
+    z-index: 2; pointer-events: none;
+  }
+
+  /* TEXT ELEMENTS */
+  .quad-content { position: relative; z-index: 3; transform: translateY(20px); transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+  .quadrant:hover .quad-content { transform: translateY(0); }
+  
+  .quad-num {
+    font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; letter-spacing: 0.2em; color: var(--accent);
+    margin-bottom: 1rem; display: block; font-weight: 700;
+  }
+  .quad-title {
+    font-family: 'Syne', sans-serif; font-size: clamp(2rem, 4vw, 3.5rem);
+    line-height: 0.9; text-transform: uppercase; margin-bottom: 1rem;
+  }
+  .quad-desc { font-size: 0.95rem; color: var(--text-gray); max-width: 420px; line-height: 1.6; opacity: 0; transition: opacity 0.5s ease 0.1s; }
+  .quadrant:hover .quad-desc { opacity: 1; }
+
+  @media (max-width: 900px) {
+    .grid-container {
+      grid-template-columns: 1fr !important;
+      grid-template-rows: repeat(4, minmax(42vh, auto)) !important;
+      height: auto !important;
+    }
+    .quadrant {
+      border-right: none;
+      border-bottom: 1px solid var(--grid-line);
+      min-height: 42vh;
+    }
+    .quadrant:nth-child(4) { border-bottom: none; }
+    .quad-desc { opacity: 1; transform: none; }
+    .quad-content { transform: none; }
+  }
+
+  /* FULLSCREEN TECHNICAL OVERLAY */
+  .details-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--bg-dark); z-index: 200; display: flex;
+    transform: translateY(100%); pointer-events: none;
+  }
+  .details-left {
+    flex: 1; border-right: 1px solid var(--grid-line);
+    padding: 8rem 5vw 5rem; display: flex; flex-direction: column; justify-content: space-between;
+    background: var(--bg-darker);
+  }
+  .details-right { flex: 1.2; position: relative; overflow: hidden; }
+  .details-right img { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.1); transform: scale(1.1); }
+  
+  .close-btn {
+    position: absolute; top: 2.5rem; right: 4vw; background: rgba(8,8,8,0.5); border: 1px solid var(--grid-line);
+    backdrop-filter: blur(8px); padding: 0.8rem 1.5rem; border-radius: 99px;
+    color: var(--text-white); font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem;
+    text-transform: uppercase; letter-spacing: 0.2em; cursor: pointer; display: flex;
+    align-items: center; gap: 12px; z-index: 210; transition: all 0.3s ease;
+  }
+  .close-btn span { font-size: 1.2rem; line-height: 1; color: var(--accent); transition: transform 0.3s; }
+  .close-btn:hover { background: var(--text-white); color: var(--bg-darker); }
+  .close-btn:hover span { transform: rotate(90deg); }
+
+  /* Animation Wrappers for Staggering */
+  .reveal-wrap { overflow: hidden; }
+  .reveal-item { display: block; transform: translateY(110%); }
+
+  .spec-tag {
+    align-self: flex-start; padding: 0.5rem 1.2rem; border: 1px solid rgba(255, 77, 0, 0.3);
+    background: rgba(255, 77, 0, 0.05); color: var(--accent); text-transform: uppercase; 
+    font-size: 0.7rem; letter-spacing: 0.15em; font-weight: 700; border-radius: 20px; margin-bottom: 2.5rem;
+  }
+  .spec-title { font-family: 'Syne', sans-serif; font-size: clamp(3rem, 6vw, 5.5rem); text-transform: uppercase; line-height: 0.9; margin-bottom: 2rem; color: var(--text-white); }
+  .spec-body { color: var(--text-gray); font-size: 1.05rem; line-height: 1.7; max-width: 500px; margin-bottom: 3rem; }
+  .spec-footer { display: flex; gap: 4rem; border-top: 1px solid var(--grid-line); padding-top: 2.5rem; }
+  .spec-metric-label { font-size: 0.7rem; text-transform: uppercase; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 0.5rem; font-weight: 600; }
+  .spec-metric-val { font-family: 'Syne', sans-serif; font-size: 2.5rem; color: var(--text-white); }
+
+  @media (max-width: 900px) {
+    .details-overlay { flex-direction: column; overflow-y: auto; }
+    .details-left { padding: 6rem 5vw 4rem; border-right: none; }
+    .details-right { min-height: 50vh; }
+    .spec-footer { gap: 2rem; flex-wrap: wrap; }
+  }
+
+  /* ===================== FLAGSHIP FOOTER ===================== */
+  .site-footer {
+    background: var(--bg-darker);
+    color: var(--text-white);
+    padding: 6rem 5vw 2rem;
+    border-top: 1px solid var(--grid-line);
+    position: relative;
+    overflow: hidden;
+    z-index: 5;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    gap: 4rem;
+    margin-bottom: 6rem;
+  }
+  .footer-brand { display: flex; flex-direction: column; align-items: flex-start; }
+  .footer-logo {
+    font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 1.4rem;
+    letter-spacing: 0.02em; display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem;
+  }
+  .footer-logo .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+  .footer-desc {
+    font-size: 0.9rem; line-height: 1.6; color: var(--text-gray); max-width: 32ch;
+  }
+  .footer-col h4 {
+    font-size: 0.75rem; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 1.5rem; font-family: 'Space Grotesk', sans-serif; text-transform: uppercase;
+  }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 1rem; }
+  .footer-col a {
+    font-size: 0.9rem; color: var(--text-gray); transition: color 0.2s ease; text-decoration: none;
+  }
+  .footer-col a:hover { color: var(--text-white); }
+  
+  .newsletter-form { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
+  .newsletter-input {
+    background: transparent; border: none; border-bottom: 1px solid var(--grid-line);
+    padding: 0.8rem 0; font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem;
+    color: var(--text-white); transition: border-color 0.3s ease;
+  }
+  .newsletter-input:focus { outline: none; border-color: var(--accent); }
+  .newsletter-btn {
+    align-self: flex-start; background: transparent; border: none; color: var(--accent);
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;
+  }
+
+  .footer-bottom-marquee {
+    width: 100%; border-top: 1px solid var(--grid-line); padding-top: 3rem; text-align: center; overflow-x: hidden;
+  }
+  .huge-text {
+    font-family: 'Montserrat', sans-serif; font-weight: 900;
+    font-size: clamp(2.4rem, 9vw, 8.5rem); line-height: 0.82; letter-spacing: -0.04em;
+    color: var(--text-white); margin-bottom: 2rem; white-space: nowrap; display: block; width: 100%; text-align: center;
+  }
+  .huge-text .red { color: var(--accent); }
+  .footer-legal {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+    gap: 1rem; font-size: 0.75rem; color: var(--text-gray); text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .footer-legal-links { display: flex; gap: 2rem; }
+  .footer-legal-links a { color: var(--text-gray); text-decoration: none; transition: color 0.3s; }
+  .footer-legal-links a:hover { color: var(--text-white); }
+  
+  @media (max-width: 1024px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 3rem; } }
+  @media (max-width: 700px) {
+    .huge-text {
+      font-size: clamp(2rem, 11vw, 3.4rem);
+      line-height: 0.9;
+      white-space: normal;
+    }
+  }
+  @media (max-width: 600px) { .footer-grid { grid-template-columns: 1fr; } .footer-legal { flex-direction: column; align-items: flex-start; gap: 1.5rem; } }
+
+</style>
+</head>
+<body class="intro-active">
+
+  <div class="lab-intro" id="labIntro" aria-hidden="true">
+    <div class="intro-grid"></div>
+    <div class="intro-card intro-card-a"></div>
+    <div class="intro-card intro-card-b"></div>
+    <div class="intro-card intro-card-c"></div>
+
+    <div class="intro-center">
+      <div class="intro-pill">Peak Theory / Laboratory</div>
+      <h1 class="intro-title" aria-hidden="true">
+        <span>M</span><span>I</span><span>L</span><span>A</span><span>B</span>
+      </h1>
+      <p class="intro-copy">Calibrating the build</p>
+    </div>
+  </div>
+
+  <header class="header" id="mainHeader">
+    <a class="logo" href="/"><span class="dot"></span> PEAK THEORY</a>
+    <nav class="center-nav">
+      <a href="/products">BOOTS</a>
+      <a href="/collection">BALLS</a>
+      <a href="/lab" class="active">LAB</a>
+      <a href="/quality">QUALITY</a>
+      <a href="/contact">CONTACT</a>
+    </nav>
+  </header>
+
+  <!-- Interactive Hero Section -->
+  <section class="hero-section">
+    <div class="image-trail-container"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">
+        <span>M</span><span>I</span><span>L</span><span>A</span><span>B</span>
+      </h1>
+      <p class="hero-desc">I craft clean, modern digital experiences that help brands tell their story with clarity and purpose.</p>
+    </div>
+    <div class="scroll-hint"><span>Scroll</span><span class="arrow" aria-hidden="true"></span></div>
+  </section>
+
+  <!-- Dynamic Liquid Grid -->
+  <div class="grid-container">
+    
+    <!-- Quadrant 1 -->
+    <div class="quadrant" data-index="1">
+      <div class="quad-overlay"></div>
+      <img src="https://i.ytimg.com/vi/1j8ilGRW7QU/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLAc74T3mzgi2rNxxO4qPRFV3PTewQ" alt="Impact Testing" class="quad-bg">
+      <div class="quad-content">
+        <span class="quad-num">01 // INTEGRITY</span>
+        <h2 class="quad-title">Impact<br>Resistance</h2>
+        <p class="quad-desc">High-velocity compression testing ensuring absolute structural integrity and shape retention under extreme dynamic loads.</p>
+      </div>
+    </div>
+
+    <!-- Quadrant 2 -->
+    <div class="quadrant" data-index="2">
+      <div class="quad-overlay"></div>
+      <img src="https://i.ytimg.com/vi/OD2ODEiE7b4/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBYteLUgBaA9VVGjK3X2ENTLFXEJA" alt="Material Fabrication" class="quad-bg">
+      <div class="quad-content">
+        <span class="quad-num">02 // FABRICATION</span>
+        <h2 class="quad-title">Material<br>Engineering</h2>
+        <p class="quad-desc">Developing and stressing hybrid polyurethane weaves for maximum weather resistance and tactile control in any climate.</p>
+      </div>
+    </div>
+
+    <!-- Quadrant 3 -->
+    <div class="quadrant" data-index="3">
+      <div class="quad-overlay"></div>
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQzViEPcmkHnixpvP5-H4_lGquE0eWSy3ZHHGSalNeQYZHfWPyb_RTza6WS&s=10" alt="Aerodynamic Wind Tunnel" class="quad-bg">
+      <div class="quad-content">
+        <span class="quad-num">03 // DYNAMICS</span>
+        <h2 class="quad-title">Aero<br>Acoustics</h2>
+        <p class="quad-desc">Simulating drag and lift coefficients to guarantee true-flight trajectories and predictable rotation for every match ball.</p>
+      </div>
+    </div>
+
+    <!-- Quadrant 4 -->
+    <div class="quadrant" data-index="4">
+      <div class="quad-overlay"></div>
+      <img src="https://www.uniswift.us/cdn/shop/files/Mask_group-10.jpg?v=1765792783" alt="Durability Simulation" class="quad-bg">
+      <div class="quad-content">
+        <span class="quad-num">04 // ENDURANCE</span>
+        <h2 class="quad-title">Durability<br>Simulation</h2>
+        <p class="quad-desc">Thousands of high-torque abrasion cycles mapping out wear-and-tear thresholds prior to authorizing mass production.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FLAGSHIP INDEX FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo"><span class="dot"></span>PEAK THEORY</div>
+        <p class="footer-desc">Smart, calculated performance. Built on pure data, engineered for the pitch. We strip away the noise to deliver unmatched precision in modern football equipment.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="/collection">Boots</a></li>
+          <li><a href="/products">Balls</a></li>
+          <li><a href="#">Apparel</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="/lab">The Lab</a></li>
+          <li><a href="/quality">Quality</a></li>
+          <li><a href="/contact">Contact Team</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Connect</h4>
+        <p class="footer-desc" style="margin-bottom: 1rem;">Join the roster for early access to drops and field tests.</p>
+        <form class="newsletter-form" onsubmit="event.preventDefault();">
+          <input type="email" class="newsletter-input" placeholder="Enter your email" required>
+          <button type="submit" class="newsletter-btn">Subscribe <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+        </form>
+      </div>
+    </div>
+    <div class="footer-bottom-marquee">
+      <div class="huge-text">PEAK <span class="red">THEORY</span></div>
+      <div class="footer-legal">
+        <span>© 2026 Peak Theory Co. All rights reserved.</span>
+        <div class="footer-legal-links">
+          <a href="#">Terms & Conditions</a>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Shipping & Returns</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Fullscreen Technical Overlay -->
+  <div class="details-overlay">
+    <button class="close-btn">Close <span>&times;</span></button>
+    <div class="details-left">
+      <div class="reveal-wrap"><div class="reveal-item spec-tag" id="spec-tag">Composite</div></div>
+      <div>
+        <div class="reveal-wrap"><h1 class="reveal-item spec-title" id="spec-title">Title</h1></div>
+        <div class="reveal-wrap" style="padding-bottom: 1rem;"><p class="reveal-item spec-body" id="spec-body">Loading specs...</p></div>
+      </div>
+      <div class="spec-footer">
+        <div>
+          <div class="reveal-wrap"><div class="reveal-item spec-metric-label" id="spec-m1-label">Metric 1</div></div>
+          <div class="reveal-wrap"><div class="reveal-item spec-metric-val" id="spec-m1-val">0</div></div>
+        </div>
+        <div>
+          <div class="reveal-wrap"><div class="reveal-item spec-metric-label" id="spec-m2-label">Metric 2</div></div>
+          <div class="reveal-wrap"><div class="reveal-item spec-metric-val" id="spec-m2-val">0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="details-right">
+      <img id="spec-img" src="" alt="Technical Asset">
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const intro = document.getElementById('labIntro');
+      const introChars = gsap.utils.toArray('.intro-title span');
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const grid = document.querySelector('.grid-container');
+      const quadrants = document.querySelectorAll('.quadrant');
+      const overlay = document.querySelector('.details-overlay');
+      const closeBtn = document.querySelector('.close-btn');
+
+      // Initialize hero elements to hidden state for animation sync
+      gsap.set('.hero-title span', { opacity: 0, y: 30, scale: 1.18, filter: 'blur(12px)' });
+      gsap.set('.hero-desc', { opacity: 0, y: 24 });
+      gsap.set('.scroll-hint', { opacity: 0, y: 18 });
+
+      if (intro) {
+        if (reduceMotion) {
+          intro.style.opacity = '0';
+          intro.style.pointerEvents = 'none';
+          document.body.classList.remove('intro-active');
+          gsap.set('.hero-title span', { opacity: 1 });
+          gsap.set('.hero-desc', { opacity: 1 });
+        } else {
+          const introTl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+          introTl
+            .fromTo('.intro-card', { scale: 0.55, rotate: -14, opacity: 0 }, { scale: 1, rotate: 0, opacity: 1, duration: 0.9, stagger: 0.08 }, 0)
+            .fromTo('.intro-grid', { scaleY: 0, opacity: 0 }, { scaleY: 1, opacity: 0.5, duration: 1.1 }, 0.05)
+            .fromTo('.intro-pill', { y: -18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, 0.2)
+            .fromTo(introChars, { yPercent: 135, rotate: -8, opacity: 0 }, { yPercent: 0, rotate: 0, opacity: 1, duration: 0.9, stagger: 0.08, ease: 'back.out(1.7)' }, 0.35)
+            .fromTo('.intro-copy', { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45 }, 1.0)
+            .to('.intro-card, .intro-grid, .intro-pill, .intro-copy', { opacity: 0, duration: 0.55, ease: 'power2.inOut' }, 1.6)
+            .to(introChars, { opacity: 0, duration: 0.5, ease: 'power2.inOut', stagger: 0.03 }, 1.6)
+            .to(intro, { autoAlpha: 0, duration: 0.8, ease: 'power2.inOut' }, 1.75)
+            .fromTo('.hero-title span',
+              {
+                opacity: 0,
+                y: 30,
+                scale: 1.18,
+                filter: 'blur(12px)'
+              },
+              {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                filter: 'blur(0px)',
+                duration: 1.05,
+                ease: 'expo.out',
+                stagger: 0.05
+              },
+              1.85
+            )
+            .fromTo('.hero-desc', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.75 }, 2.1)
+            .fromTo('.scroll-hint', { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6 }, 2.35)
+            .call(() => {
+              document.body.classList.remove('intro-active');
+              intro.style.pointerEvents = 'none';
+            }, null, 2.5);
+        }
+      } else {
+        document.body.classList.remove('intro-active');
+        gsap.set('.hero-title span', { opacity: 1 });
+        gsap.set('.hero-desc', { opacity: 1 });
+      }
+
+      // --- INTERACTIVE HERO IMAGE TRAIL ---
+      const heroSection = document.querySelector('.hero-section');
+      const trailContainer = document.querySelector('.image-trail-container');
+      
+      const trailImages = [
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTfR9swnOgfulMJF7y0f6YcBkKrz_v--aRlq5pHeBOcoAkvVKyE1xDy5Na6&s=10',
+        'https://xpertintl.co.uk/pictures/gallery/19_pic_lrg.jpg',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVWtx7xM-xhO6WxOLQJ3IktFnVl5H0-IfwSzj4NMg4W118Jh4Vv3OiVaI&s=10',
+        'https://alqadah.com/wp-content/uploads/2024/12/700-Sports-Goods-Webpage-PicturesReserved_ImageAttachment_12_ContentImage13_17341888749411_2.jpg',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGOoGcGc3yl2FTdr6uaUwlHiAn919CII1xzea6WAdcyQ&s=10',
+        'https://friendbrotherssports.com/wp-content/uploads/2026/05/made-in-pakistan-sportswear-manufacturing-1024x1024.webp'
+      ];
+      
+      
+      let imgIndex = 0;
+      let lastMousePos = { x: 0, y: 0 };
+      const threshold = 85; // Distance in pixels required to spawn the next image
+
+      heroSection.addEventListener('mousemove', (e) => {
+        const rect = heroSection.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const distance = Math.hypot(mouseX - lastMousePos.x, mouseY - lastMousePos.y);
+
+        if (distance > threshold) {
+          spawnTrailImage(mouseX, mouseY);
+          lastMousePos = { x: mouseX, y: mouseY };
+        }
+      });
+
+      function spawnTrailImage(x, y) {
+        const img = document.createElement('img');
+        img.src = trailImages[imgIndex];
+        img.className = 'trail-image';
+        img.style.left = `${x}px`;
+        img.style.top = `${y}px`;
+
+        const randomRotation = (Math.random() - 0.5) * 24; 
+
+        trailContainer.appendChild(img);
+
+        // Entry animation sequence
+        gsap.fromTo(img, 
+          { scale: 0.3, opacity: 0, rotation: randomRotation },
+          { scale: 1, opacity: 1, duration: 0.4, ease: 'power2.out' }
+        );
+
+        // Disappearance sequence
+        gsap.to(img, {
+          scale: 0.7,
+          opacity: 0,
+          duration: 0.8,
+          delay: 0.6,
+          ease: 'power2.in',
+          onComplete: () => img.remove()
+        });
+
+        imgIndex = (imgIndex + 1) % trailImages.length;
+      }
+
+      // Animating the columns and rows object values to inject into CSS Grid (Desktop Only)
+      let cols = { left: 50, right: 50 };
+      let rows = { top: 50, bottom: 50 };
+
+      function applyGrid() {
+        if (window.innerWidth > 900) {
+          grid.style.gridTemplateColumns = `${cols.left}% ${cols.right}%`;
+          grid.style.gridTemplateRows = `${rows.top}% ${rows.bottom}%`;
+        }
+      }
+
+      quadrants.forEach((quad) => {
+        quad.addEventListener('mouseenter', () => {
+          if (window.innerWidth <= 900) return;
+          const idx = quad.getAttribute('data-index');
+          let targetCols = { left: 50, right: 50 };
+          let targetRows = { top: 50, bottom: 50 };
+
+          if (idx === '1') { targetCols = { left: 56, right: 44 }; targetRows = { top: 56, bottom: 44 }; }
+          else if (idx === '2') { targetCols = { left: 44, right: 56 }; targetRows = { top: 56, bottom: 44 }; }
+          else if (idx === '3') { targetCols = { left: 56, right: 44 }; targetRows = { top: 44, bottom: 56 }; }
+          else if (idx === '4') { targetCols = { left: 44, right: 56 }; targetRows = { top: 44, bottom: 56 }; }
+
+          gsap.to(cols, { left: targetCols.left, right: targetCols.right, duration: 0.8, ease: "power3.out", onUpdate: applyGrid });
+          gsap.to(rows, { top: targetRows.top, bottom: targetRows.bottom, duration: 0.8, ease: "power3.out", onUpdate: applyGrid });
+        });
+      });
+
+      grid.addEventListener('mouseleave', () => {
+        if (window.innerWidth <= 900) return;
+        gsap.to(cols, { left: 50, right: 50, duration: 0.8, ease: "power3.out", onUpdate: applyGrid });
+        gsap.to(rows, { top: 50, bottom: 50, duration: 0.8, ease: "power3.out", onUpdate: applyGrid });
+      });
+
+      // Updated Technical Spec database for Sports Balls Manufacturing
+      const specData = {
+        '1': {
+          tag: 'Impact Dynamics',
+          title: 'Impact Resistance',
+          body: 'Our pneumatic press labs simulate years of peak game-time stress in mere hours. We meticulously measure the deformation and recovery of the core bladders to ensure zero shape degradation over the ball\'s active lifespan.',
+          m1_label: 'Deformation Limit', m1_val: '< 1.2%',
+          m2_label: 'Impact Cycles', m2_val: '100k+',
+          img: 'https://i.ytimg.com/vi/1j8ilGRW7QU/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLAc74T3mzgi2rNxxO4qPRFV3PTewQ'
+        },
+        '2': {
+          tag: 'Polymer Stress Testing',
+          title: 'Material Engineering',
+          body: 'Exposed to extreme UV radiation, cryogenic freezing, and hyper-humid enclosures. Our thermal matrix shells are engineered to maintain 100% ply adhesion and consistent tactile friction regardless of pitch conditions.',
+          m1_label: 'Ply Adhesion', m1_val: '350 N',
+          m2_label: 'Thermal Range', m2_val: '-15° / 45°',
+          img: 'https://i.ytimg.com/vi/OD2ODEiE7b4/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBYteLUgBaA9VVGjK3X2ENTLFXEJA'
+        },
+        '3': {
+          tag: 'Flight Mechanics',
+          title: 'Aero Acoustics',
+          body: 'By precisely mapping the micro-texturing on our outer casings within a wind tunnel, we reduce drag and eliminate unpredictable knuckle-ball effects. The result is pure, calculated ball flight verified by high-speed laser tracking.',
+          m1_label: 'Drag Coeff.', m1_val: '0.12 Cd',
+          m2_label: 'Flight Dev.', m2_val: '< 0.5%',
+          img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQzViEPcmkHnixpvP5-H4_lGquE0eWSy3ZHHGSalNeQYZHfWPyb_RTza6WS&s=10'
+        },
+        '4': {
+          tag: 'Endurance Modeling',
+          title: 'Durability Simulation',
+          body: 'Using robotic abrasive wheels and synthetic turf friction pads, we accelerate the life cycle of every seam and panel. Only builds that survive 2,000 miles of simulated surface friction reach the final lineup.',
+          m1_label: 'Abrasion Res.', m1_val: 'Class A',
+          m2_label: 'Seam Tension', m2_val: '950 N',
+          img: 'https://www.uniswift.us/cdn/shop/files/Mask_group-10.jpg?v=1765792783'
+        }
+      };
+
+      // Create a reusable timeline for the modal
+      const modalTl = gsap.timeline({ paused: true, reversed: true });
+      
+      modalTl
+        .to(overlay, { translateY: '0%', duration: 0.8, ease: 'expo.inOut' })
+        .fromTo('.details-right img', 
+          { scale: 1.3, opacity: 0 }, 
+          { scale: 1, opacity: 1, duration: 1.2, ease: 'power3.out' }, 
+          "-=0.4"
+        )
+        .fromTo('.reveal-item', 
+          { y: '110%', rotate: 2 }, 
+          { y: '0%', rotate: 0, duration: 0.6, stagger: 0.05, ease: 'power3.out' }, 
+          "-=1.0"
+        );
+
+      // Fullscreen Activation
+      quadrants.forEach((quad) => {
+        quad.addEventListener('click', () => {
+          const idx = quad.getAttribute('data-index');
+          const data = specData[idx];
+
+          // Populate data
+          document.getElementById('spec-tag').innerText = data.tag;
+          document.getElementById('spec-title').innerText = data.title;
+          document.getElementById('spec-body').innerText = data.body;
+          document.getElementById('spec-m1-label').innerText = data.m1_label;
+          document.getElementById('spec-m1-val').innerText = data.m1_val;
+          document.getElementById('spec-m2-label').innerText = data.m2_label;
+          document.getElementById('spec-m2-val').innerText = data.m2_val;
+          document.getElementById('spec-img').src = data.img;
+
+          overlay.style.pointerEvents = 'auto';
+          document.body.style.overflow = 'hidden'; // Lock background scrolling
+          modalTl.play();
+        });
+      });
+
+      // Close Fullscreen Overlay
+      closeBtn.addEventListener('click', () => {
+        modalTl.reverse().then(() => {
+          overlay.style.pointerEvents = 'none';
+          document.body.style.overflow = ''; // Restore scrolling
+        });
+      });
+
+      // Dock the header into a compact pill once the page is scrolled
+      const header = document.getElementById('mainHeader');
+      function updateHeaderState() {
+        header.classList.toggle('docked', window.scrollY > 24);
+      }
+      window.addEventListener('scroll', updateHeaderState, { passive: true });
+      updateHeaderState();
+    });
+  </script>
+  {% include "advanced/cart.html" %}
+</body>
+</html>

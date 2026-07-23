@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>QUALITY — Peak Theory</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Space+Grotesk:wght@300;400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+
+    <style>
+      :root {
+        --bg-dark: #080808;
+        --bg-darker: #000000;
+        --bg-card: #111111;
+        --accent: #ff4d00;
+        --text-white: #f5f5f7;
+        --text-gray: #86868b;
+        --grid-line: rgba(255, 255, 255, 0.08);
+      }
+      
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      
+      body,
+      html {
+        width: 100%;
+        background-color: var(--bg-dark);
+        color: var(--text-white);
+        overflow-x: hidden;
+        font-family: 'Space Grotesk', sans-serif;
+      }
+      
+      /* TACTICAL NOISE OVERLAY */
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: url('data:image/svg+xml;utf8,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');
+        opacity: 0.03;
+        z-index: 9999;
+        pointer-events: none;
+        mix-blend-mode: overlay;
+      }
+      
+      /* ===================== WIDGET HEADER ===================== */
+      .header {
+        position: fixed;
+        top: 2rem;
+        left: 50%;
+        width: calc(100% - 6vw);
+        max-width: 1400px;
+        transform: translateX(-50%);
+        padding: 1rem 1.6rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.76rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        z-index: 100;
+        border: 1px solid rgba(255, 255, 255, 0);
+        border-radius: 2rem;
+        background: rgba(8, 8, 8, 0);
+        backdrop-filter: blur(0px);
+        box-shadow: none;
+        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1), width 0.4s ease, max-width 0.4s ease;
+        color: var(--text-white);
+        opacity: 0;
+      }
+      
+      /* Scrolled Docked State (Desktop & Tablet Safe) */
+      .header.docked {
+        top: 0.8rem;
+        left: 50%;
+        width: calc(100% - 2rem);
+        max-width: 620px;
+        transform: translateX(-50%);
+        padding: 0.65rem 1.4rem;
+        background: rgba(8, 8, 8, 0.85);
+        border-color: var(--accent);
+        border-radius: 999px;
+        backdrop-filter: blur(20px) saturate(160%);
+        box-shadow: 0 0 20px rgba(255, 77, 0, 0.2), 0 14px 40px rgba(0, 0, 0, 0.4);
+      }
+      
+      .header a {
+        color: var(--text-gray);
+        text-decoration: none;
+        transition: color 0.3s;
+        white-space: nowrap;
+      }
+      .header a:hover,
+      .header a.active {
+        color: var(--text-white);
+      }
+      
+      .header .logo {
+        color: var(--text-white);
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 900;
+        font-size: 1.25rem;
+        letter-spacing: 0.04em;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .header .logo .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        border: 1.5px solid var(--bg-dark);
+      }
+      
+      /* Navigation Wrapper */
+      .mobile-nav-wrapper {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        justify-content: center;
+        padding: 0 1rem;
+      }
+      .header .center-nav {
+        display: flex;
+        gap: 2.5vw; /* Fluid gap for dynamic spacing scaling */
+      }
+      
+      /* Arrow Styling */
+      .nav-arrow {
+        display: none;
+        background: transparent;
+        border: none;
+        color: var(--accent);
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 0 0.5rem;
+        transition: color 0.3s;
+      }
+      .nav-arrow:hover {
+        color: var(--text-white);
+      }
+      
+      /* Hide mobile contact link on desktop */
+      .mobile-contact {
+        display: none;
+      }
+
+      .desktop-contact {
+        display: block;
+        flex-shrink: 0;
+      }
+      
+      /* Mid-sized Laptop & Tablet Screen Optimizations */
+      @media (max-width: 1024px) {
+        .header .center-nav {
+          gap: 1.2rem;
+        }
+        .header .logo {
+          font-size: 1.1rem;
+        }
+      }
+      
+      /* ===================== MOBILE WIDGET HEADER ===================== */
+      @media (max-width: 800px) {
+        html,
+        body {
+          width: 100% !important;
+          max-width: 100vw !important;
+          overflow-x: hidden !important;
+          position: relative;
+        }
+      
+        /* CONTAIN GLOWS & BACKGROUND LAYERS INSIDE SCREEN */
+        .ambient-glow,
+        .ambient-glow-right,
+        .grid-bg-overlay {
+          max-width: 100vw !important;
+          overflow: hidden !important;
+        }
+
+        /* Show mobile contact link inside carousel */
+        .mobile-contact {
+          display: inline-block !important;
+        }
+
+        /* BLACKISH PILL CAROUSEL CONTAINER */
+        .mobile-nav-wrapper {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex: 1;
+          min-width: 0; /* Ensures child overflow scrolls correctly */
+          padding: 0.4rem 0.6rem;
+          background: rgba(12, 12, 12, 0.95);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 999px;
+          backdrop-filter: blur(12px) saturate(140%);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+        }
+      
+        /* SHOW CAROUSEL ARROWS ON MOBILE */
+        .nav-arrow {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          z-index: 2;
+        }
+      
+        /* HERO NAV-BAR */
+        .header {
+          top: 1rem;
+          left: 50%;
+          right: auto;
+          width: 92vw;
+          max-width: 480px;
+          transform: translateX(-50%);
+          padding: 0;
+          background: transparent;
+          border: none;
+          backdrop-filter: none;
+          box-shadow: none;
+      
+          display: flex;
+          flex-direction: row;
+          flex-wrap: nowrap;
+          justify-content: space-between;
+          align-items: center;
+          gap: 0.6rem;
+          overflow-x: visible;
+        }
+      
+        /* DOCKED SCROLL WIDGET */
+        .header.docked {
+          top: auto;
+          bottom: 1.2rem;
+          width: 92vw;
+          max-width: 480px;
+          padding: 0;
+          background: transparent;
+          border: none;
+          backdrop-filter: none;
+          box-shadow: none;
+        }
+      
+        /* LOGO HANDLING */
+        .header .logo {
+          font-size: 1rem;
+          width: auto;
+          margin: 0;
+          flex-shrink: 0;
+          background: rgba(12, 12, 12, 0.95);
+          padding: 0.5rem 0.9rem;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        /* INNER CENTER NAV SCROLL CONTAINER */
+        .header .center-nav {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: nowrap;
+          gap: 1.2rem;
+          width: auto;
+          margin: 0;
+          padding: 0 0.4rem;
+          overflow-x: auto;
+          scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .header .center-nav::-webkit-scrollbar {
+          display: none;
+        }
+      
+        .header .center-nav a {
+          font-size: 0.68rem;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+      
+        /* HIDE DESKTOP CONTACT BUTTON ON MOBILE */
+        .desktop-contact {
+          display: none !important;
+        }
+      
+        /* LAYOUT & CARDS SIZING FIXES */
+        .contact-terminal,
+        .nodes-hub,
+        .reviews-section {
+          padding-left: 1.2rem !important;
+          padding-right: 1.2rem !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
+        }
+      
+        .reviews-grid {
+          grid-template-columns: 1fr !important;
+          width: 100% !important;
+        }
+      
+        .review-card {
+          padding: 2rem 1.5rem !important;
+          min-height: auto !important;
+        }
+      
+        .reviews-stats-summary {
+          gap: 1.5rem !important;
+          padding: 1.2rem !important;
+          width: 100% !important;
+          flex-wrap: wrap !important;
+        }
+      
+        .modal-box {
+          padding: 2.5rem 1.2rem !important;
+          width: 90vw !important;
+        }
+      
+        .huge-text {
+          white-space: normal !important;
+          word-break: break-word !important;
+          font-size: clamp(2.4rem, 12vw, 4rem) !important;
+        }
+      }
+      
+      /* ===================== SPLIT COUNTER SCREEN ===================== */
+      .split-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+        opacity: 0;
+      }
+      
+      .split-container {
+        display: flex;
+        width: 100%;
+        height: 100vh;
+      }
+      
+      /* Left Side: Images sliding UP */
+      .split-left-images {
+        width: 50%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        border-right: 1px solid var(--grid-line);
+      }
+      .img-scroller {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 400%;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .slide-img-box {
+        width: 100%;
+        height: 25%;
+        position: relative;
+        overflow: hidden;
+      }
+      .slide-img-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: grayscale(80%) contrast(1.1);
+        transition: filter 0.5s;
+      }
+      .slide-img-box img:hover {
+        filter: grayscale(10%) contrast(1.2);
+      }
+      
+      .img-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(8, 8, 8, 0.1) 0%, rgba(8, 8, 8, 0.7) 100%);
+        pointer-events: none;
+      }
+      
+      /* Right Side: Text sliding DOWN */
+      .split-right-text {
+        width: 50%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+      }
+      .text-scroller {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 400%;
+        display: flex;
+        flex-direction: column;
+      }
+      .slide-text-box {
+        width: 100%;
+        height: 25%;
+        padding: 6vw;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border-bottom: 1px solid var(--grid-line);
+        background: var(--bg-dark);
+      }
+      
+      .slide-num {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.2rem;
+        color: var(--accent);
+        margin-bottom: 1.5rem;
+        display: block;
+        letter-spacing: 0.1em;
+      }
+      .slide-title {
+        font-family: 'Syne', sans-serif;
+        font-size: clamp(2.5rem, 5vw, 4.5rem);
+        text-transform: uppercase;
+        line-height: 0.95;
+        margin-bottom: 2rem;
+      }
+      .slide-desc {
+        font-size: 1.1rem;
+        color: var(--text-gray);
+        line-height: 1.7;
+        max-width: 500px;
+      }
+      
+      .scroll-indicator {
+        position: absolute;
+        bottom: 2rem;
+        right: 4vw;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: var(--accent);
+      }
+      .scroll-line {
+        width: 40px;
+        height: 1px;
+        background: var(--accent);
+        overflow: hidden;
+        position: relative;
+      }
+      .scroll-line::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        animation: scrollAnim 1.5s infinite;
+      }
+      @keyframes scrollAnim {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(100%);
+        }
+      }
+      
+      @media (max-width: 900px) {
+        .split-container {
+          flex-direction: column;
+        }
+        .split-left-images,
+        .split-right-text {
+          width: 100%;
+          height: 50vh;
+        }
+        .slide-text-box {
+          padding: 8vw 6vw;
+          align-items: center;
+          text-align: center;
+        }
+        .slide-img-box img {
+          filter: none !important;
+          transform: none !important;
+        }
+        .img-overlay {
+          background: linear-gradient(180deg, rgba(8, 8, 8, 0.08) 0%, rgba(8, 8, 8, 0.34) 100%);
+        }
+        .scroll-indicator {
+          display: none;
+        }
+      }
+      
+      /* ===================== REVIEWS SECTION ===================== */
+      .reviews-section {
+        padding: 8rem 4vw;
+        background: var(--bg-darker);
+        border-top: 1px solid var(--grid-line);
+        position: relative;
+        z-index: 10;
+      }
+      .section-header {
+        text-align: center;
+        margin-bottom: 5rem;
+      }
+      .section-tag {
+        color: var(--accent);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        display: block;
+        margin-bottom: 1rem;
+      }
+      .section-title {
+        font-family: 'Syne', sans-serif;
+        font-size: clamp(2.5rem, 4vw, 3.5rem);
+        text-transform: uppercase;
+      }
+      
+      .reviews-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .review-card {
+        background: var(--bg-card);
+        border: 1px solid var(--grid-line);
+        padding: 3rem 2.5rem;
+        border-radius: 12px;
+        transition: transform 0.4s ease, border-color 0.4s ease;
+      }
+      .review-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(255, 77, 0, 0.4);
+      }
+      .stars {
+        color: var(--accent);
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        letter-spacing: 0.1em;
+      }
+      .review-quote {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: var(--text-white);
+        margin-bottom: 2.5rem;
+        font-style: italic;
+      }
+      .review-author {
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.3rem;
+      }
+      .review-role {
+        font-size: 0.8rem;
+        color: var(--text-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      
+      /* ===================== FOOTER ===================== */
+      .site-footer {
+        background: var(--bg-darker);
+        padding: 6rem 5vw 2rem;
+        border-top: 1px solid var(--grid-line);
+        position: relative;
+        z-index: 10;
+      }
+      .footer-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1.5fr;
+        gap: 4rem;
+        margin-bottom: 6rem;
+      }
+      .footer-brand {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .footer-logo {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 900;
+        font-size: 1.4rem;
+        letter-spacing: 0.02em;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 1.5rem;
+      }
+      .footer-logo .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+      .footer-desc {
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: var(--text-gray);
+        max-width: 32ch;
+      }
+      
+      .footer-col h4 {
+        font-size: 0.75rem;
+        letter-spacing: 0.2em;
+        color: var(--accent);
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+      }
+      .footer-col ul {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .footer-col a {
+        font-size: 0.9rem;
+        color: var(--text-gray);
+        transition: color 0.2s ease;
+        text-decoration: none;
+      }
+      .footer-col a:hover {
+        color: var(--text-white);
+      }
+      
+      .newsletter-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+      .newsletter-input {
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid var(--grid-line);
+        padding: 0.8rem 0;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.9rem;
+        color: var(--text-white);
+        transition: border-color 0.3s ease;
+      }
+      .newsletter-input:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+      .newsletter-btn {
+        align-self: flex-start;
+        background: transparent;
+        border: none;
+        color: var(--accent);
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.75rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+      
+      .footer-legal {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        font-size: 0.75rem;
+        color: var(--text-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-top: 1px solid var(--grid-line);
+        padding-top: 3rem;
+      }
+      .footer-legal-links {
+        display: flex;
+        gap: 2rem;
+      }
+      .footer-legal-links a {
+        color: var(--text-gray);
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+      .footer-legal-links a:hover {
+        color: var(--text-white);
+      }
+      
+      @media (max-width: 1024px) {
+        .footer-grid {
+          grid-template-columns: 1fr 1fr;
+          gap: 3rem;
+        }
+      }
+      @media (max-width: 600px) {
+        .footer-grid {
+          grid-template-columns: 1fr;
+        }
+        .footer-legal {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header with single Desktop Contact and built-in Mobile Contact link inside pill nav -->
+    <header class="header" id="mainHeader">
+      <a class="logo" href="/"><span class="dot"></span> PEAK THEORY</a>
+
+      <div class="mobile-nav-wrapper">
+        <button class="nav-arrow left-arrow" aria-label="Scroll left">&#10094;</button>
+        <nav class="center-nav" id="centerNav">
+          <a href="/products">BOOTS</a>
+          <a href="/collection">COLLECTION</a>
+          <a href="/lab">LAB</a>
+          <a href="/quality" class="active">QUALITY</a>
+          <a href="/contact" class="mobile-contact">CONTACT</a>
+        </nav>
+        <button class="nav-arrow right-arrow" aria-label="Scroll right">&#10095;</button>
+      </div>
+
+      <div class="desktop-contact">
+        <a href="/contact">CONTACT</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="split-wrapper">
+        <div class="scroll-indicator">
+          Scroll to Explore<div class="scroll-line"></div>
+        </div>
+        <div class="split-container">
+          <!-- Left side: Images (Slides UP) -->
+          <div class="split-left-images">
+            <div class="img-scroller">
+              <div class="slide-img-box">
+                <img src="https://static.wixstatic.com/media/ad40e9_a6135750d3264d91ba992e157c42f4ce~mv2.jpg/v1/fill/w_640,h_500,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ad40e9_a6135750d3264d91ba992e157c42f4ce~mv2.jpg" alt="Leather Cutting" />
+                <div class="img-overlay"></div>
+              </div>
+              <div class="slide-img-box">
+                <img src="https://imagescdn.simons.ca/vb/ab322124c066f8839bd3d5ce087963fe/man-wearing-and-orange-golf-polo-standing-next-to-a-golf-bag.jpg" alt="Detailing" />
+                <div class="img-overlay"></div>
+              </div>
+              <div class="slide-img-box">
+                <img src="https://cdn.roadsandkingdoms.com/uploads/2014/02/SialkotFactory.jpg?class=1536" alt="Material Testing" />
+                <div class="img-overlay"></div>
+              </div>
+              <div class="slide-img-box">
+                <img src="https://5.imimg.com/data5/SELLER/Default/2025/6/522780436/YW/QV/IF/30787983/sports-equipment-500x500.jpg" alt="Cleat Traction Testing" />
+                <div class="img-overlay"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right side: Content (Slides DOWN) -->
+          <div class="split-right-text">
+            <div class="text-scroller">
+              <div class="slide-text-box">
+                <span class="slide-num">04 / AGILITY</span>
+                <h2 class="slide-title">Dynamic<br />Traction</h2>
+                <p class="slide-desc">Biomechanical stud configuration optimized via pressure-plate mapping. We calculate exact shear forces to ensure instantaneous release and explosive pivot grip on firm ground.</p>
+              </div>
+              <div class="slide-text-box">
+                <span class="slide-num">03 / VALUATION</span>
+                <h2 class="slide-title">Mechanical<br />Testing</h2>
+                <p class="slide-desc">Each run of the Peak Theory boot is mechanically flexed under sub-zero and humid atmospheres, ensuring bonding points never break down.</p>
+              </div>
+              <div class="slide-text-box">
+                <span class="slide-num">02 / CRAFT</span>
+                <h2 class="slide-title">Heritage<br />Stitching</h2>
+                <p class="slide-desc">Hand-aligned structures sewn with reinforced high-tension thread. Our structural artisans construct stress nodes with extreme durability matrices, preventing blowout during intense strikes.</p>
+              </div>
+              <div class="slide-text-box">
+                <span class="slide-num">01 / INTEGRITY</span>
+                <h2 class="slide-title">Inflexible,<br />Sourcing</h2>
+                <p class="slide-desc">We screen our luxury full-grain materials for micro-fibrous density. Only structural sections that pass 40 flex cycles are hand-picked for modeling, delivering a pure, tactile touch on the ball.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Elite Feedback Section -->
+      <section class="reviews-section">
+        <div class="section-header">
+          <span class="section-tag">Tested on the Pitch</span>
+          <h2 class="section-title">Elite Feedback</h2>
+        </div>
+        <div class="reviews-grid">
+          <div class="review-card">
+            <div class="stars">★★★★★</div>
+            <p class="review-quote">"The mechanical bonding and seam integrity are unlike anything I've worn. There's zero stretch or power loss when striking through the ball."</p>
+            <div class="review-author">Marcus D.</div>
+            <div class="review-role">Pro Midfielder</div>
+          </div>
+          <div class="review-card">
+            <div class="stars">★★★★★</div>
+            <p class="review-quote">"Traction is immediate. The soleplate flexibility gives me the exact snap-back I need for quick directional changes on wet turf."</p>
+            <div class="review-author">Elias R.</div>
+            <div class="review-role">Academy Winger</div>
+          </div>
+          <div class="review-card">
+            <div class="stars">★★★★★</div>
+            <p class="review-quote">"You can feel the micro-fibrous density in the touch. It breaks in instantly but holds its structure perfectly over a rigorous 40-game season."</p>
+            <div class="review-author">Julian T.</div>
+            <div class="review-role">Center Back</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FLAGSHIP FOOTER -->
+    <footer class="site-footer">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <span class="dot"></span>PEAK THEORY
+          </div>
+          <p class="footer-desc">Smart, calculated performance. Built on pure data, engineered for the pitch. We strip away the noise to deliver unmatched precision.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Shop</h4>
+          <ul>
+            <li>
+              <a href="/collection">Boots</a>
+            </li>
+            <li>
+              <a href="/products">Balls</a>
+            </li>
+            <li>
+              <a href="#">Apparel</a>
+            </li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <ul>
+            <li>
+              <a href="/lab">The Lab</a>
+            </li>
+            <li>
+              <a href="/quality">Quality</a>
+            </li>
+            <li>
+              <a href="/contact">Contact Team</a>
+            </li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <p class="footer-desc" style="margin-bottom: 1rem;">Join the roster for early access drops.</p>
+          <form class="newsletter-form" onsubmit="event.preventDefault();">
+            <input type="email" class="newsletter-input" placeholder="Enter your email" required />
+            <button type="submit" class="newsletter-btn">
+              Subscribe<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </button>
+          </form>
+        </div>
+      </div>
+      <div class="footer-legal">
+        <span>© 2026 Peak Theory Co. All rights reserved.</span>
+        <div class="footer-legal-links">
+          <a href="#">Terms</a>
+          <a href="#">Privacy</a>
+          <a href="#">Shipping</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        gsap.registerPlugin(ScrollTrigger)
+      
+        const header = document.getElementById('mainHeader')
+        const splitWrapper = document.querySelector('.split-wrapper')
+        const imgScroller = document.querySelector('.img-scroller')
+        const textScroller = document.querySelector('.text-scroller')
+      
+        // --- OPENING ANIMATION ---
+        const introTl = gsap.timeline()
+        introTl.to(splitWrapper, { opacity: 1, duration: 1, ease: 'power2.out' }).to(header, { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }, '-=0.5').fromTo('.slide-title, .slide-desc', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: 'power3.out' }, '-=0.6')
+      
+        // --- NAV DOCKING WIDGET (desktop only) ---
+        const updateHeaderDockStatus = () => {
+          if (window.innerWidth > 800) {
+            header.classList.toggle('docked', window.scrollY > 40)
+          } else {
+            header.classList.remove('docked')
+          }
+        }
+      
+        window.addEventListener('scroll', updateHeaderDockStatus, { passive: true })
+        window.addEventListener('resize', updateHeaderDockStatus, { passive: true })
+        updateHeaderDockStatus()
+      
+        // --- MOBILE HORIZONTAL SCROLL LOGIC ---
+        const leftArrow = document.querySelector('.left-arrow')
+        const rightArrow = document.querySelector('.right-arrow')
+        const centerNav = document.getElementById('centerNav')
+      
+        if (leftArrow && rightArrow && centerNav) {
+          leftArrow.addEventListener('click', () => {
+            centerNav.scrollBy({ left: -120, behavior: 'smooth' })
+          })
+          rightArrow.addEventListener('click', () => {
+            centerNav.scrollBy({ left: 120, behavior: 'smooth' })
+          })
+        }
+      
+        // --- SCROLLTRIGGER SPLIT SCREEN LOGIC ---
+        gsap.set(textScroller, { yPercent: -75 })
+      
+        const splitTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: '.split-wrapper',
+            pin: true,
+            start: 'top top',
+            end: '+=300%',
+            scrub: 1,
+            anticipatePin: 1
+          }
+        })
+      
+        splitTl.to(imgScroller, { yPercent: -75, ease: 'none' }, 0).to(textScroller, { yPercent: 0, ease: 'none' }, 0)
+      })
+    </script>
+    {% include 'advanced/cart.html' %}
+  </body>
+</html>

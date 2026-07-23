@@ -1,0 +1,715 @@
+<!--   =====================================================================
+     PEAK THEORY — CART PARTIAL
+     Include this file on every page using Django's include tag,
+     pointing at advanced/cart.html
+     Self-contained: styles, markup, and script are all scoped/namespaced
+     under #pt-cart-root so it can't collide with page-specific CSS/JS.
+     Cart state lives in localStorage under the key "pt_cart" so it
+     persists across full page loads (Django renders separate pages).
+     =====================================================================   -->
+<div id="pt-cart-root">
+  <style>
+    #pt-cart-root {
+      --pt-black: #0a0d09;
+      --pt-black-2: #12160f;
+      --pt-neon: #d7ff3e;
+      --pt-neon-dim: #a6cc2e;
+      --pt-white: #f6f7f1;
+      --pt-muted: rgba(246, 247, 241, 0.62);
+      --pt-line: rgba(215, 255, 62, 0.18);
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    #pt-cart-root * {
+      box-sizing: border-box;
+    }
+    
+    /* ---------------- Floating cart button ---------------- */
+    #pt-cart-btn {
+      position: fixed;
+      z-index: 150;
+      bottom: 2.2rem;
+      left: 2.2rem;
+      display: none; /* shown via JS only when cart has items */
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.85rem 1.3rem 0.85rem 0.95rem;
+      background: rgba(10, 13, 9, 0.88);
+      border: 1.5px solid var(--pt-neon);
+      border-radius: 999px;
+      color: var(--pt-white);
+      cursor: pointer;
+      backdrop-filter: blur(16px) saturate(160%);
+      -webkit-backdrop-filter: blur(16px) saturate(160%);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0px rgba(215, 255, 62, 0);
+      transform: translateY(14px) scale(0.9);
+      opacity: 0;
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    #pt-cart-btn.pt-visible {
+      display: inline-flex;
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    #pt-cart-btn:hover {
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55), 0 0 22px rgba(215, 255, 62, 0.28);
+    }
+    #pt-cart-btn.pt-bump {
+      animation: pt-bump 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes pt-bump {
+      0% {
+        transform: scale(1);
+      }
+      35% {
+        transform: scale(1.14);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+    #pt-cart-btn .pt-icon-wrap {
+      position: relative;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: none;
+    }
+    #pt-cart-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--pt-neon);
+    }
+    #pt-cart-count {
+      position: absolute;
+      top: -9px;
+      right: -10px;
+      min-width: 17px;
+      height: 17px;
+      padding: 0 4px;
+      border-radius: 999px;
+      background: var(--pt-neon);
+      color: var(--pt-black);
+      font-size: 0.62rem;
+      font-weight: 700;
+      line-height: 17px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    #pt-cart-btn .pt-label {
+      font-size: 0.74rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    #pt-cart-btn .pt-subtotal {
+      font-size: 0.74rem;
+      color: var(--pt-neon);
+      font-weight: 700;
+      border-left: 1px solid rgba(215, 255, 62, 0.25);
+      padding-left: 0.7rem;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    
+    @media (max-width: 760px) {
+      #pt-cart-btn {
+        left: auto;
+        right: 1.1rem;
+        bottom: auto;
+        top: 50%;
+        transform: translateY(calc(-50% + 14px)) scale(0.9);
+        padding: 0.85rem;
+        border-radius: 50%;
+      }
+      #pt-cart-btn.pt-visible {
+        transform: translateY(-50%) scale(1);
+      }
+      #pt-cart-btn .pt-label,
+      #pt-cart-btn .pt-subtotal {
+        display: none;
+      }
+    }
+    
+    /* ---------------- Overlay + panel ---------------- */
+    #pt-cart-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(6, 8, 5, 0.6);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    #pt-cart-overlay.pt-open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    
+    #pt-cart-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      z-index: 201;
+      height: 100vh;
+      width: min(440px, 92vw);
+      background: linear-gradient(180deg, var(--pt-black-2) 0%, var(--pt-black) 100%);
+      border-left: 1px solid var(--pt-line);
+      box-shadow: -30px 0 60px rgba(0, 0, 0, 0.5);
+      transform: translateX(100%);
+      transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      color: var(--pt-white);
+    }
+    #pt-cart-overlay.pt-open #pt-cart-panel {
+      transform: translateX(0);
+    }
+    
+    #pt-cart-panel .pt-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.6rem 1.6rem 1.2rem;
+      border-bottom: 1px solid var(--pt-line);
+      flex: none;
+    }
+    #pt-cart-panel .pt-panel-title {
+      font-family: 'Anton', sans-serif;
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    #pt-cart-panel .pt-panel-title .pt-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--pt-neon);
+    }
+    #pt-cart-close {
+      width: 2.6rem;
+      height: 2.6rem;
+      border-radius: 50%;
+      border: 1px solid rgba(246, 247, 241, 0.18);
+      background: transparent;
+      color: var(--pt-white);
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex: none;
+    }
+    #pt-cart-close:hover {
+      background: var(--pt-neon);
+      border-color: var(--pt-neon);
+      color: var(--pt-black);
+      transform: rotate(90deg);
+    }
+    
+    /* ---- carousel track of line items ---- */
+    #pt-cart-items {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: 1rem 1.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      scroll-behavior: smooth;
+    }
+    #pt-cart-items::-webkit-scrollbar {
+      width: 5px;
+    }
+    #pt-cart-items::-webkit-scrollbar-thumb {
+      background: rgba(215, 255, 62, 0.25);
+      border-radius: 999px;
+    }
+    
+    .pt-cart-item {
+      display: grid;
+      grid-template-columns: 76px 1fr auto;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.9rem;
+      background: rgba(246, 247, 241, 0.03);
+      border: 1px solid rgba(246, 247, 241, 0.06);
+      border-radius: 0.9rem;
+      opacity: 0;
+      transform: translateX(24px);
+      animation: pt-item-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes pt-item-in {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    .pt-cart-item.pt-removing {
+      animation: pt-item-out 0.32s ease forwards;
+    }
+    @keyframes pt-item-out {
+      to {
+        opacity: 0;
+        transform: translateX(30px) scale(0.94);
+      }
+    }
+    .pt-item-img {
+      width: 76px;
+      height: 76px;
+      border-radius: 0.6rem;
+      object-fit: cover;
+      background: #111;
+      flex: none;
+    }
+    .pt-item-info .pt-item-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--pt-white);
+    }
+    .pt-item-info .pt-item-tag {
+      font-size: 0.7rem;
+      color: var(--pt-neon-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 0.15rem;
+    }
+    .pt-item-info .pt-item-price {
+      font-size: 0.82rem;
+      color: var(--pt-muted);
+      margin-top: 0.35rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .pt-item-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.6rem;
+    }
+    .pt-qty-stepper {
+      display: flex;
+      align-items: center;
+      border: 1px solid rgba(215, 255, 62, 0.3);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .pt-qty-stepper button {
+      width: 1.9rem;
+      height: 1.9rem;
+      background: transparent;
+      border: none;
+      color: var(--pt-neon);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+      line-height: 1;
+    }
+    .pt-qty-stepper button:hover {
+      background: rgba(215, 255, 62, 0.12);
+    }
+    .pt-qty-stepper button:active {
+      transform: scale(0.9);
+    }
+    .pt-qty-stepper .pt-qty-val {
+      min-width: 1.6rem;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .pt-item-remove {
+      background: none;
+      border: none;
+      color: rgba(246, 247, 241, 0.4);
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+    .pt-item-remove:hover {
+      color: #e31b23;
+    }
+    
+    /* ---- empty state (shown only if panel somehow opens with 0 items) ---- */
+    #pt-cart-empty {
+      display: none;
+      flex: 1 1 auto;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 0.6rem;
+      padding: 2rem;
+      text-align: center;
+      color: var(--pt-muted);
+    }
+    #pt-cart-empty .pt-empty-headline {
+      font-family: 'Anton', sans-serif;
+      font-size: 1.3rem;
+      color: var(--pt-white);
+      text-transform: uppercase;
+    }
+    #pt-cart-empty .pt-empty-sub {
+      font-size: 0.85rem;
+      max-width: 26ch;
+    }
+    
+    /* ---- footer / order button ---- */
+    #pt-cart-footer {
+      flex: none;
+      padding: 1.3rem 1.6rem 1.6rem;
+      border-top: 1px solid var(--pt-line);
+      background: rgba(10, 13, 9, 0.4);
+    }
+    .pt-subtotal-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--pt-muted);
+      margin-bottom: 0.3rem;
+    }
+    .pt-total-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.1rem;
+    }
+    .pt-total-row .pt-total-label {
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--pt-white);
+      font-weight: 600;
+    }
+    .pt-total-row .pt-total-val {
+      font-family: 'Anton', sans-serif;
+      font-size: 1.6rem;
+      color: var(--pt-neon);
+      font-variant-numeric: tabular-nums;
+    }
+    #pt-cart-order-btn {
+      width: 100%;
+      padding: 1.05rem;
+      background: var(--pt-neon);
+      color: var(--pt-black);
+      border: 2px solid var(--pt-neon);
+      border-radius: 999px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, color 0.25s ease;
+    }
+    #pt-cart-order-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(215, 255, 62, 0.25);
+      background: var(--pt-white);
+      border-color: var(--pt-white);
+    }
+    #pt-cart-order-btn:active {
+      transform: translateY(0);
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      #pt-cart-btn,
+      #pt-cart-panel,
+      #pt-cart-overlay,
+      .pt-cart-item,
+      #pt-cart-btn.pt-bump {
+        animation: none !important;
+        transition: opacity 0.2s linear, transform 0.2s linear !important;
+      }
+    }
+  </style>
+
+  <!-- Floating trigger button -->
+  <button id="pt-cart-btn" type="button" aria-label="Open cart" aria-haspopup="dialog">
+    <span class="pt-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="9" cy="21" r="1"></circle>
+        <circle cx="20" cy="21" r="1"></circle>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+      </svg>
+      <span id="pt-cart-count">0</span>
+    </span>
+    <span class="pt-label">Cart</span>
+    <span class="pt-subtotal" id="pt-cart-btn-subtotal">$0</span>
+  </button>
+
+  <!-- Slide-out panel -->
+  <div id="pt-cart-overlay" role="dialog" aria-modal="true" aria-label="Shopping cart">
+    <aside id="pt-cart-panel">
+      <div class="pt-panel-head">
+        <div class="pt-panel-title">
+          <span class="pt-dot"></span>Your Cart
+        </div>
+        <button id="pt-cart-close" type="button" aria-label="Close cart">&times;</button>
+      </div>
+
+      <div id="pt-cart-items"></div>
+
+      <div id="pt-cart-empty">
+        <div class="pt-empty-headline">Cart's Empty</div>
+        <div class="pt-empty-sub">Add a build from the lineup and it'll show up here.</div>
+      </div>
+
+      <div id="pt-cart-footer">
+        <div class="pt-subtotal-row">
+          <span>Subtotal</span><span id="pt-cart-subtotal-line">$0</span>
+        </div>
+        <div class="pt-total-row">
+          <span class="pt-total-label">Total</span>
+          <span class="pt-total-val" id="pt-cart-total">$0</span>
+        </div>
+        <button id="pt-cart-order-btn" type="button">Order Now →</button>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    ;(function () {
+      'use strict'
+    
+      var FALLBACK_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2312160f'/%3E%3Ccircle cx='50' cy='48' r='22' fill='none' stroke='%23d7ff3e' stroke-width='2'/%3E%3C/svg%3E"
+    
+      function getCookie(name) {
+        var cookieValue = null
+        if (document.cookie && document.cookie !== '') {
+          var cookies = document.cookie.split(';')
+          for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim()
+            if (cookie.substring(0, name.length + 1) === name + '=') {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
+              break
+            }
+          }
+        }
+        return cookieValue
+      }
+      var CSRF_TOKEN = getCookie('csrftoken') || document.querySelector('[name=csrfmiddlewaretoken]')?.value
+    
+      function money(n) {
+        return '$' + Number(n || 0).toFixed(0)
+      }
+    
+      var btn = document.getElementById('pt-cart-btn')
+      var countEl = document.getElementById('pt-cart-count')
+      var btnSubtotalEl = document.getElementById('pt-cart-btn-subtotal')
+      var overlay = document.getElementById('pt-cart-overlay')
+      var closeBtn = document.getElementById('pt-cart-close')
+      var itemsWrap = document.getElementById('pt-cart-items')
+      var emptyWrap = document.getElementById('pt-cart-empty')
+      var subtotalLine = document.getElementById('pt-cart-subtotal-line')
+      var totalEl = document.getElementById('pt-cart-total')
+      var orderBtn = document.getElementById('pt-cart-order-btn')
+    
+      var lastState = { items: [], subtotal: 0, total_qty: 0 }
+    
+      /* ---- All server calls funnel through here ---- */
+      function apiCall(url, body) {
+        return fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+          body: JSON.stringify(body || {})
+        }).then(function (res) {
+          if (!res.ok) throw new Error('Cart request failed: ' + res.status)
+          return res.json()
+        })
+      }
+    
+      function fetchCart() {
+        return fetch('/cart/', { headers: { 'X-CSRFToken': CSRF_TOKEN } }).then(function (res) {
+          return res.json()
+        })
+      }
+    
+      function render(state) {
+        if (state) lastState = state
+        var items = lastState.items || []
+        var totalQty = lastState.total_qty || 0
+        var subtotal = lastState.subtotal || 0
+    
+        if (totalQty > 0) {
+          btn.classList.add('pt-visible')
+        } else {
+          btn.classList.remove('pt-visible')
+          if (overlay.classList.contains('pt-open')) closePanel()
+        }
+    
+        countEl.textContent = totalQty
+        btnSubtotalEl.textContent = money(subtotal)
+        subtotalLine.textContent = money(subtotal)
+        totalEl.textContent = money(subtotal)
+    
+        itemsWrap.innerHTML = ''
+        if (items.length === 0) {
+          emptyWrap.style.display = 'flex'
+        } else {
+          emptyWrap.style.display = 'none'
+          items.forEach(function (item, idx) {
+            var row = document.createElement('div')
+            row.className = 'pt-cart-item'
+            row.style.animationDelay = idx * 0.05 + 's'
+            row.setAttribute('data-id', item.id) // server CartItem PK
+    
+            row.innerHTML = '<img class="pt-item-img" alt="" src="' + (item.image || FALLBACK_IMG) + '" referrerpolicy="no-referrer" onerror="this.src=\'' + FALLBACK_IMG + '\'">' + '<div class="pt-item-info">' + '<div class="pt-item-name"></div>' + (item.tag ? '<div class="pt-item-tag"></div>' : '') + '<div class="pt-item-price"></div>' + '</div>' + '<div class="pt-item-controls">' + '<div class="pt-qty-stepper">' + '<button type="button" class="pt-qty-dec" aria-label="Decrease quantity">&minus;</button>' + '<span class="pt-qty-val"></span>' + '<button type="button" class="pt-qty-inc" aria-label="Increase quantity">&plus;</button>' + '</div>' + '<button type="button" class="pt-item-remove">Remove</button>' + '</div>'
+    
+            row.querySelector('.pt-item-name').textContent = item.name || 'Item'
+            if (item.tag) row.querySelector('.pt-item-tag').textContent = item.tag
+            row.querySelector('.pt-item-price').textContent = money(item.price) + ' each'
+            row.querySelector('.pt-qty-val').textContent = item.qty
+    
+            itemsWrap.appendChild(row)
+          })
+        }
+      }
+    
+      function updateQty(itemId, delta) {
+        var current = lastState.items.find(function (it) {
+          return String(it.id) === String(itemId)
+        })
+        if (!current) return
+        var newQty = (current.qty || 0) + delta
+        apiCall('/cart/update/', { item_id: itemId, qty: newQty })
+          .then(render)
+          .catch(function (err) {
+            console.error('Qty update failed:', err)
+          })
+      }
+    
+      function removeItem(itemId, skipAnim) {
+        var rowEl = itemsWrap.querySelector('.pt-cart-item[data-id="' + CSS.escape(String(itemId)) + '"]')
+        var doRemove = function () {
+          apiCall('/cart/remove/', { item_id: itemId })
+            .then(render)
+            .catch(function (err) {
+              console.error('Remove failed:', err)
+            })
+        }
+        if (rowEl && !skipAnim) {
+          rowEl.classList.add('pt-removing')
+          setTimeout(doRemove, 300)
+        } else {
+          doRemove()
+        }
+      }
+    
+      itemsWrap.addEventListener('click', function (e) {
+        var itemEl = e.target.closest('.pt-cart-item')
+        if (!itemEl) return
+        var itemId = itemEl.getAttribute('data-id')
+        if (e.target.classList.contains('pt-qty-inc')) updateQty(itemId, 1)
+        else if (e.target.classList.contains('pt-qty-dec')) updateQty(itemId, -1)
+        else if (e.target.classList.contains('pt-item-remove')) removeItem(itemId)
+      })
+    
+      function openPanel() {
+        overlay.classList.add('pt-open')
+        document.body.style.overflow = 'hidden'
+      }
+      function closePanel() {
+        overlay.classList.remove('pt-open')
+        document.body.style.overflow = ''
+      }
+    
+      btn.addEventListener('click', function () {
+        fetchCart().then(render)
+        openPanel()
+      })
+      closeBtn.addEventListener('click', closePanel)
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) closePanel()
+      })
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && overlay.classList.contains('pt-open')) closePanel()
+      })
+    
+      /* Order button now just navigates — the server cart is already
+           up to date because every add/remove/qty change synced live. */
+      orderBtn.addEventListener('click', function () {
+        if (!lastState.items || lastState.items.length === 0) return
+        window.location.href = '/checkout/'
+      })
+    
+      /* =================================================================
+             PUBLIC API — call from any product card / modal on any page:
+    
+               PeakCart.add({ product_type: "ball", product_id: 14,
+                               name: "Strike 01", tag: "Match Ball",
+                               price: 210, image: "https://...", qty: 1 });
+               PeakCart.remove(cartItemId);
+               PeakCart.setQty(cartItemId, 3);
+               PeakCart.clear();
+               PeakCart.refresh();
+               PeakCart.open();
+             ================================================================= */
+      window.PeakCart = {
+        add: function (product) {
+          if (!product || product.product_id == null) {
+            console.error('PeakCart.add requires product_type and product_id')
+            return
+          }
+          apiCall('/cart/add/', {
+            product_type: product.product_type || 'ball',
+            product_id: product.product_id,
+            qty: product.qty || 1
+          })
+            .then(function (state) {
+              render(state)
+              btn.classList.remove('pt-bump')
+              void btn.offsetWidth
+              btn.classList.add('pt-bump')
+            })
+            .catch(function (err) {
+              console.error('Add to cart failed:', err)
+            })
+        },
+        remove: function (itemId) {
+          removeItem(itemId)
+        },
+        setQty: function (itemId, qty) {
+          apiCall('/cart/update/', { item_id: itemId, qty: qty })
+            .then(render)
+            .catch(function (err) {
+              console.error('Set qty failed:', err)
+            })
+        },
+        clear: function () {
+          apiCall('/cart/clear/', {})
+            .then(render)
+            .catch(function (err) {
+              console.error('Clear cart failed:', err)
+            })
+        },
+        refresh: function () {
+          return fetchCart().then(render)
+        },
+        open: function () {
+          fetchCart().then(render)
+          openPanel()
+        },
+        close: closePanel
+      }
+    
+      // Initial load — populate the button/badge from the server on every page.
+      fetchCart()
+        .then(render)
+        .catch(function (err) {
+          console.error('Initial cart fetch failed:', err)
+        })
+    })()
+  </script>
+</div>

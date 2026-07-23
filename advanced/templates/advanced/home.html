@@ -1,0 +1,1458 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Peak Theory — Smart, Calculated Performance</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Playfair+Display:ital,wght@1,500;1,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#0a0d09;
+    --black-2:#12160f;
+    --accent-red:#e31b23;
+    --bg-page:#f4f3ef;
+    --pitch:#1c4420;
+    --pitch-deep:#0d2410;
+    --neon:#d7ff3e;
+    --neon-dim:#a6cc2e;
+    --white:#f6f7f1;
+    --muted:rgba(246,247,241,0.62);
+    --line:rgba(215,255,62,0.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{
+    height:100%;
+    background:var(--black);
+    color:var(--white);
+    font-family:'Space Grotesk',sans-serif;
+    overflow:hidden;
+    overscroll-behavior:none;
+  }
+  body.free-scroll{overflow-y:auto;}
+  h1,h2{font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:0.005em;line-height:0.92;font-weight:400;}
+
+  /* ===================== INTRO ===================== */
+  @keyframes bgPulse {
+    0% { background-size: 100% 100%; }
+    50% { background-size: 115% 115%; }
+    100% { background-size: 100% 100%; }
+  }
+  #intro{
+    position:fixed;inset:0;z-index:200;
+    background: url('https://res.cloudinary.com/dqfmlcbew/image/upload/v1784560658/ChatGPT_Image_Jul_15_2026_09_49_25_PM_mpzdk6.png') center/cover no-repeat;
+    background-color: var(--black);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+  
+  @keyframes chevronHover {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(5%); }
+  }
+  .intro-chevron{position:absolute;pointer-events:none;z-index:1;width:min(16vw,190px);aspect-ratio:1.4;}
+ .intro-chevron span {
+  position:absolute;inset:0;
+  background:var(--neon);
+  clip-path:polygon(0 0, 55% 0, 100% 50%, 55% 100%, 0 100%, 45% 50%);
+}
+  .intro-chevron span:nth-child(1){opacity:0.92;}
+  .intro-chevron span:nth-child(2){opacity:0.45;transform:translateX(18%);}
+  .intro-chevron span:nth-child(3){opacity:0.2;transform:translateX(36%);}
+  .chevron-tl{top:9%;left:6%; animation: chevronHover 3s ease-in-out infinite alternate;}
+  .chevron-br{bottom:9%;right:6%;transform:rotate(180deg); animation: chevronHover 3s ease-in-out infinite alternate-reverse;}
+
+  .intro-inner{position:relative;z-index:2;text-align:center;padding:0 6vw;}
+  .intro-caption {
+  font-size:0.85rem;letter-spacing:0.3em;text-transform:uppercase;
+  color:var(--bg-page);
+  margin-bottom:0.8rem;font-weight:600;
+}
+  .intro-wordmark .line {
+  display:block;font-size:clamp(3.2rem,11vw,9rem);
+  color:var(--bg-page);
+}
+  .intro-wordmark .line.accent{
+    color:var(--white);
+    -webkit-text-stroke:2px var(--black);
+    text-shadow:0 6px 18px rgba(10,13,9,0.25);
+  }
+  .intro-wordmark .line.accent {
+  color:var(--accent-red);
+  -webkit-text-stroke: 1px rgba(10, 13, 9, 0.5); /* Subtle dark stroke for depth */
+  text-shadow: 0 4px 15px rgba(227, 27, 35, 0.4); /* Optional: gives the red a nice glow */
+}
+.intro-sweep{
+  position:absolute;top:0;left:-60%;width:40%;height:100%;
+  /* Using a semi-transparent neon for the sweep */
+  background:linear-gradient(100deg, transparent, rgba(215, 255, 62, 0.15), transparent);
+  transform:skewX(-15deg);z-index:1;
+}
+
+  #markerIntro{position:absolute;top:64%;left:50%;width:min(24vw,260px);aspect-ratio:1;transform:translate(-50%,-50%);opacity:0;pointer-events:none;}
+
+  /* ===================== NAV ===================== */
+  nav{
+    position:fixed;z-index:60;
+    top:2rem;left:3vw;width:calc(100% - 6vw);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:1rem 1.6rem;
+    background:rgba(10,13,9,0);
+    border:1px solid rgba(215,255,62,0);
+    border-radius:2rem;
+    backdrop-filter:blur(0px);
+    box-shadow:0 0px 0px rgba(0,0,0,0);
+    transition:all 0.6s cubic-bezier(0.16,1,0.3,1);
+    color:var(--white);
+  }
+  nav:not(.docked) {
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.65));
+  }
+  nav.docked{
+    top:0.8rem;left:50%;width:min(620px,92vw);
+    transform:translateX(-50%);
+    padding:0.65rem 1.4rem;
+    background:rgba(10,13,9,0.85);
+    border-color:var(--neon);
+    border-radius:999px;
+    backdrop-filter:blur(20px) saturate(160%);
+    box-shadow:0 0 20px rgba(215,255,62,0.25), 0 14px 40px rgba(0,0,0,0.6);
+  }
+  nav .mark{font-family:'Anton',sans-serif;font-size:1.25rem;letter-spacing:0.04em;white-space:nowrap;display:flex;align-items:center;gap:0.5rem;color:var(--white);}
+  nav .mark .dot{width:8px;height:8px;border-radius:50%;background:var(--neon);border:1.5px solid var(--black);display:inline-block;}
+  nav ul{list-style:none;display:flex;gap:2rem;font-size:0.76rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);}
+  nav ul li {
+  cursor: pointer;
+}
+
+nav ul li a {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+
+/* Optional: Adds a subtle hover effect since they are now clickable */
+nav ul li a:hover {
+  color: var(--white); 
+}
+
+  /* ===================== TRACK / PANELS ===================== */
+  #track{position:fixed;top:0;left:0;width:100%;height:500vh;will-change:transform;z-index:5;}
+  .panel{position:relative;width:100%;height:100vh;padding:0 6vw;overflow:hidden;}
+  #webgl{position:fixed;inset:0;width:100vw;height:100vh;z-index:15;pointer-events:none;}
+
+  .hero-bg-image {
+    position:absolute;inset:0;pointer-events:none;z-index:1;
+    background: 
+      linear-gradient(to right, rgba(10,13,9,0.7) 0%, rgba(10,13,9,0.3) 50%, rgba(10,13,9,0.1) 100%),
+      linear-gradient(to bottom, rgba(10,13,9,0.5) 0%, transparent 25%),
+      url('https://res.cloudinary.com/dqfmlcbew/image/upload/v1783942611/ChatGPT_Image_Jul_13_2026_at_04_36_26_PM_egs09i.png') center/cover no-repeat;
+  }
+
+  .reveal-bg-image {
+    position:absolute;inset:0;pointer-events:none;z-index:1;
+    background: 
+      linear-gradient(to right, rgba(0, 0, 0, 0.7) 0%, rgba(1, 1, 1, 0.3) 50%, rgba(0, 0, 0, 0.1) 80%),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.409) 100%, transparent 100%),
+      url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGxZJ_4gmz-rEcW29AOUB32pJn3yjEBglNW09D2qik2kG_Mnm5gXMaja7O&s=10') center/cover no-repeat;
+  }
+  
+  #hero {background:linear-gradient(165deg, var(--pitch) 0%, var(--pitch-deep) 100%);}
+  #reveal, #outro {background:linear-gradient(165deg, var(--black-2) 0%, var(--black) 100%);}
+
+  .orb{position:absolute;border-radius:50%;pointer-events:none;z-index:1;will-change:opacity, transform;}
+  .orb-fill{background:radial-gradient(circle at 36% 32%, rgba(215,255,62,0.22), rgba(215,255,62,0.05) 58%, transparent 74%);}
+  .orb-ring{border:2px solid rgba(215,255,62,0.28);}
+
+  .eyebrow{font-size:0.75rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--neon);margin-bottom:1rem;display:flex;align-items:center;gap:0.55rem;}
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--neon);border:1px solid var(--white);}
+  .lede{max-width:32ch;color:var(--muted);font-size:1rem;line-height:1.65;margin-top:1.2rem;}
+
+  /* ---- Hero Layout ---- */
+  #hero{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:4vw;}
+  .hero-copy{position:relative;z-index:10;max-width:44ch;padding-left:2vw;justify-self:start;}
+  .hero-copy h1{
+    font-size:clamp(2.8rem,5.8vw,5.2rem);
+    color:var(--white);
+    letter-spacing:-0.02em;
+    line-height:0.95;
+    text-shadow:0 2px 14px rgba(10,13,9,0.4);
+  }
+  .hero-copy h1 .accent{color:var(--neon);}
+  .hero-cta{
+    margin-top:2.5rem;display:inline-flex;align-items:center;gap:0.6rem;cursor:pointer;
+    padding:0.95rem 2rem;border:2px solid var(--neon);background:var(--neon);color:var(--black);
+    font-size:0.8rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border-radius:2rem;
+    transition:transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .hero-cta:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--white);}
+
+  .hero-visual{position:relative;height:min(66vh,640px);z-index:10;}
+  .ball-marker{position:absolute;opacity:0;pointer-events:none;}
+  #markerHero{top:42%;left:56%;width:min(27vw,290px);aspect-ratio:1;transform:translate(-50%,-50%);}
+  #orbHeroFill{top:42%;left:56%;width:min(36vw,380px);aspect-ratio:1;transform:translate(-50%,-50%);}
+  #orbHeroRing{top:39%;left:59%;width:min(29vw,310px);aspect-ratio:1;transform:translate(-50%,-50%);}
+  
+  .boot-wrap{position:absolute;left:2%;bottom:6%;width:44%;max-width:340px;z-index:2;transform-origin:100% 100%;will-change:transform;}
+  .boot-wrap img{width:100%;height:auto;display:block;filter:drop-shadow(0 24px 30px rgba(0,0,0,0.4));}
+  .boot-wrap.sway-active img{animation:bootSway 5s ease-in-out infinite;}
+  @keyframes bootSway{0%,100%{transform:rotate(-1.2deg);}50%{transform:rotate(1deg);}}
+
+  .scroll-cue{
+    position:absolute;bottom:3rem;right:6vw;z-index:10;
+    font-size:0.72rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);
+    display:flex;align-items:center;gap:0.6rem;
+    filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  }
+  .scroll-cue .bar{width:1px;height:32px;background:linear-gradient(var(--neon),transparent);animation:scrollbar 1.6s ease-in-out infinite;}
+  @keyframes scrollbar{0%{transform:scaleY(0);transform-origin:top;}50%{transform:scaleY(1);transform-origin:top;}51%{transform-origin:bottom;}100%{transform:scaleY(0);transform-origin:bottom;}}
+
+  /* ---- Reveal ---- */
+  #reveal{display:grid;grid-template-columns:0.95fr 1.05fr;align-items:center;gap:3vw;}
+  .ball-visual{position:relative;height:min(58vh,560px);display:flex;align-items:center;justify-content:center;z-index:10;}
+  #markerReveal{top:50%;left:50%;width:min(27vw,340px);aspect-ratio:1;transform:translate(-50%,-50%);}
+  .ball-visual img{
+    width:100%;max-width:520px;opacity:0;transform:scale(0.85);
+    filter:drop-shadow(0 26px 40px rgba(0,0,0,0.45));
+  }
+  .reveal-copy{z-index:10;}
+  .reveal-copy h2{font-size:clamp(2.1rem,4.8vw,3.8rem);color:var(--white);}
+  .feature-list{margin-top:2.2rem;display:flex;flex-direction:column;gap:1.1rem;}
+  .feature{border-left:3px solid var(--neon-dim);padding-left:1rem;}
+  .feature .num{font-size:0.75rem;letter-spacing:0.1em;color:var(--neon);font-weight:700;}
+  .feature .name{font-size:1.02rem;margin-top:0.15rem;font-weight:600;color:var(--white);}
+  .feature .sub{font-size:0.85rem;color:var(--muted);margin-top:0.1rem;}
+
+  /* ---- Outro (checklist + photo split style) ---- */
+  .section-split{position:relative;height:100%;display:flex;flex-direction:column;padding-top:7.5rem;padding-bottom:1.2rem;}
+  .split-top{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:2.5vw 4vw;padding-bottom:2.2rem;z-index:10;position:relative;}
+  .headline-group{max-width:60ch;}
+  .headline-block{display:inline-block;border-left:4px solid var(--neon);padding-left:1.1rem;}
+  .headline-block .chip{
+    display:inline-block;background:var(--neon);color:var(--black);
+    padding:0.12em 0.4em;font-size:clamp(1.8rem,4.2vw,3.2rem);line-height:1.08;margin-bottom:0.3rem;
+  }
+  .headline-block .line-white{
+    display:inline-block;color:var(--white);font-size:clamp(1.8rem,4.2vw,3.2rem);line-height:1.08;
+  }
+  .split-desc{max-width:34ch;color:var(--muted);font-size:0.95rem;line-height:1.7;}
+
+  .split-bottom{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:0.86fr 1.14fr;margin:0 -6vw;overflow:hidden;}
+  .split-panel-list{
+    background:var(--neon);color:var(--black);
+    padding:2.4rem 3vw 2.4rem 6vw;
+    display:flex;flex-direction:column;justify-content:center;gap:1.5rem;
+    min-height:0;
+  }
+  .split-item{display:flex;align-items:flex-start;gap:0.9rem;}
+  .split-item .check{
+    width:26px;height:26px;border-radius:50%;background:var(--black);color:var(--neon);
+    display:flex;align-items:center;justify-content:center;flex:none;font-size:0.8rem;font-weight:700;margin-top:0.1rem;
+  }
+  .split-item .item-name{font-size:1rem;font-weight:700;}
+  .split-item .item-sub{font-size:0.85rem;color:rgba(10,13,9,0.72);margin-top:0.2rem;line-height:1.45;}
+
+  .split-photo{position:relative;overflow:hidden;background:var(--black);}
+  .split-photo-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 15%;}
+  .split-photo::after{
+    content:'';position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(to left, rgba(10,13,9,0) 55%, rgba(10,13,9,0.55) 100%);
+  }
+  .outro-ball-visual{position:absolute;inset:0;pointer-events:none;}
+  #markerOutro{top:85%;left:85%;width:min(11vw,120px);aspect-ratio:1;transform:translate(-50%,-50%);}
+
+
+  /* ===================== QUALITY (SECTION 4) ===================== */
+  #quality {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #090e09;
+    padding: 0;
+  }
+  .q-bg-diamond {
+    position: absolute;
+    width: 65vw;
+    height: 65vw;
+    background: #0e150d;
+    transform: rotate(45deg);
+    z-index: 1;
+  }
+  .q-brand {
+    position: absolute;
+    top: 6vh;
+    left: 6vw;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: var(--white);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .q-brand svg { width: 22px; height: 22px; }
+  .q-brand .line { width: 80px; height: 2px; background: var(--white); }
+
+  .q-content {
+    position: relative;
+    z-index: 10;
+    max-width: 580px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 4vw;
+  }
+  .q-headline {
+    font-family: 'Anton', sans-serif;
+    font-size: clamp(3rem, 6.5vw, 5.5rem);
+    line-height: 0.9;
+    color: var(--neon);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .q-divider {
+    width: 80px;
+    height: 3px;
+    background: var(--white);
+    margin: 1.8rem 0;
+  }
+  .q-desc {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--white);
+  }
+
+  .q-img-left {
+    position: absolute;
+    left: 0;
+    top: 15%;
+    width: 25vw;
+    height: 55vh;
+    z-index: 5;
+  }
+  .q-img-left img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-bottom-right-radius: 12vw;
+  }
+  
+  .q-img-right {
+    position: absolute;
+    right: 0;
+    bottom: 12%;
+    width: 28vw;
+    height: 52vh;
+    z-index: 5;
+  }
+  .q-img-right img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-top-left-radius: 14vw;
+  }
+
+  .q-squiggle {
+    position: absolute;
+    width: 90px;
+    height: 30px;
+    z-index: 12;
+  }
+  .q-squiggle-top {
+    top: -15px;
+    right: -45px;
+  }
+  .q-squiggle-bottom {
+    bottom: -15px;
+    left: -45px;
+  }
+
+  /* ===================== CONTACT (SECTION 5) ===================== */
+  #contact {
+    padding: 0; 
+    display: flex; 
+    flex-direction: column;
+  }
+  .contact-top {
+    flex: 0 0 57%;
+    background: #080a07;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding-left: 6vw;
+  }
+  .ct-left {
+    position: relative;
+    z-index: 10;
+    width: 55%;
+  }
+  .ct-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: var(--white);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 2.2rem;
+    letter-spacing: 0.05em;
+  }
+  .ct-brand svg { width: 22px; height: 22px; }
+  .ct-brand .line { width: 80px; height: 2px; background: var(--white); }
+  
+  .ct-headline {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.4rem, 6.5vw, 5.5rem);
+    color: var(--neon);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .ct-right {
+    position: absolute;
+    right: 0;
+    top: 15%;
+    bottom: 0;
+    width: 42%;
+    border-top-left-radius: 4.5vw;
+    border-bottom-left-radius: 4.5vw;
+    overflow: hidden;
+    background: #111;
+  }
+  .ct-right img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  .ct-sparkle {
+    position: absolute;
+    right: calc(42% - 25px); 
+    top: calc(15% - 25px);
+    width: 60px;
+    height: 60px;
+    z-index: 5;
+  }
+
+  .contact-bottom {
+    flex: 0 0 43%;
+    background: var(--black-2);
+    border-top: 1px solid rgba(215, 255, 62, 0.15);
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 4rem 6vw;
+    overflow: hidden;
+  }
+  
+  /* Modern Web-Footer CSS */
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1.5fr;
+    gap: 4vw;
+    width: 100%;
+    position: relative;
+    z-index: 5;
+  }
+  .footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  .footer-brand .brand-logo {
+    font-family: 'Anton', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.04em;
+    color: var(--neon);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .footer-brand .brand-logo .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--white);
+  }
+  .footer-brand .desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.5;
+    max-width: 25ch;
+  }
+  .footer-col h4 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--white);
+    font-weight: 700;
+  }
+  .footer-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .footer-links a {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.25s ease;
+  }
+  .footer-links a:hover {
+    color: var(--neon);
+  }
+  .footer-newsletter p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .subscribe-form {
+    display: flex;
+    border-bottom: 1.5px solid rgba(215, 255, 62, 0.3);
+    padding-bottom: 0.4rem;
+    transition: border-color 0.25s ease;
+  }
+  .subscribe-form:focus-within {
+    border-color: var(--neon);
+  }
+  .subscribe-form input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--white);
+    font-family: inherit;
+    font-size: 0.85rem;
+    width: 100%;
+  }
+  .subscribe-form input::placeholder {
+    color: rgba(246,247,241,0.3);
+  }
+  .subscribe-form button {
+    background: transparent;
+    border: none;
+    color: var(--neon);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding-left: 0.5rem;
+    transition: transform 0.25s ease;
+  }
+  .subscribe-form button:hover {
+    transform: translateX(3px);
+  }
+  .footer-bottom-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    border-top: 1px solid rgba(215, 255, 62, 0.08);
+    padding-top: 2rem;
+    margin-top: 2.5rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  /* ===================== MOBILE OVERRIDES ===================== */
+  @media (max-width:760px){
+    /* UPPER NAV ON HERO, DOCKED WIDGET AT BOTTOM ON OTHER SECTIONS */
+    nav {
+      top: 1.5rem !important;
+      bottom: auto !important;
+      left: 5% !important;
+      width: 90% !important;
+      transform: none !important;
+      flex-direction: row !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      padding: 0.5rem 0 !important;
+      background: transparent !important;
+      border: none !important;
+      backdrop-filter: none !important;
+      box-shadow: none !important;
+    }
+    nav .mark {
+      font-size: 1.1rem !important;
+    }
+    nav ul {
+      display: flex !important;
+      width: auto !important;
+      justify-content: flex-end !important;
+      flex-wrap: nowrap !important;
+      gap: 0.7rem !important;
+      font-size: 0.68rem !important;
+    }
+    nav.docked {
+      top: auto !important;
+      bottom: 1.5rem !important;
+      left: 5% !important;
+      width: 90% !important;
+      transform: none !important;
+      flex-direction: column !important;
+      gap: 0.4rem !important;
+      padding: 0.8rem 1rem !important;
+      background: rgba(10,13,9,0.92) !important;
+      border: 1px solid var(--neon) !important;
+      border-radius: 1.2rem !important;
+      backdrop-filter: blur(20px) saturate(160%) !important;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 15px rgba(215,255,62,0.15) !important;
+    }
+    nav.docked .mark {
+      font-size: 0.9rem !important;
+      justify-content: center !important;
+      width: 100% !important;
+    }
+    nav.docked ul {
+      display: flex !important;
+      width: 100% !important;
+      justify-content: center !important;
+      flex-wrap: wrap !important;
+      gap: 0.9rem !important;
+      font-size: 0.68rem !important;
+    }
+
+    /* HERO SECTION */
+    #hero{grid-template-columns:1fr;gap:2vh;}
+    .hero-visual{height:40vh;margin-top:1rem;order:1;}
+    .hero-copy{order:2;padding-left:0;max-width:100%;}
+    .hero-bg-image {
+      background: 
+        linear-gradient(to bottom, rgba(10,13,9,0.6) 0%, rgba(10,13,9,0.4) 100%),
+        url('https://res.cloudinary.com/dqfmlcbew/image/upload/v1783942611/ChatGPT_Image_Jul_13_2026_at_04_36_26_PM_egs09i.png') center/cover no-repeat;
+    }
+    .scroll-cue {
+      bottom: 2.2rem !important;
+      right: 4vw;
+    }
+
+    /* REVEAL SECTION (CLEAR BOTTOM NAV WIDGET) */
+    #reveal{
+      grid-template-columns:1fr;
+      padding-bottom: 7.5rem !important;
+    }
+    .ball-visual{height:34vh;}
+    .reveal-bg-image {
+      background: 
+        linear-gradient(to bottom, rgba(10,13,9,0.6) 0%, rgba(10,13,9,0.4) 100%),
+        url('https://media.istockphoto.com/id/1179445475/photo/close-up-of-various-sport-equipments-isolated-on-black-background.jpg?s=612x612&w=0&k=20&c=cT9EXeDSX8qkYXXMxOWGd4ZPz89wOseMuKAwvc4E5TQ=') center/cover no-repeat;
+    }
+    .boot-wrap{width:56%;}
+
+    /* OUTRO SECTION (CLEAR BOTTOM NAV WIDGET) */
+    .section-split{
+      padding-top:6rem;
+      padding-bottom: 7.5rem !important;
+    }
+    .split-top{padding-bottom:1.1rem;}
+    .headline-block .chip, .headline-block .line-white{font-size:clamp(1.6rem,7vw,2.3rem);}
+    .split-desc{max-width:100%;font-size:0.85rem;}
+    .split-bottom{grid-template-columns:1fr;grid-template-rows:auto 1fr;margin:0 -6vw;}
+    .split-photo{order:1;min-height:24vh;}
+    .split-panel-list{
+      order:2;
+      padding:1.1rem 6vw 2.5rem !important;
+      gap:0.7rem;
+    }
+    .split-item .item-sub{display:none;}
+    #markerOutro{top:88%;left:85%;}
+
+    /* QUALITY SECTION (SECTION 4 CORRECTIONS) */
+    #quality {
+      flex-direction: column !important;
+      justify-content: center !important;
+      padding: 6vh 6vw 7.5rem !important;
+      height: 100vh !important;
+      box-sizing: border-box !important;
+    }
+    .q-bg-diamond {
+      width: 110vw !important;
+      height: 110vw !important;
+      top: 25% !important;
+      left: -5% !important;
+    }
+    .q-brand {
+      top: 2rem !important;
+      left: 6vw !important;
+      font-size: 0.75rem !important;
+    }
+    .q-brand .line {
+      width: 40px !important;
+    }
+    .q-content {
+      max-width: 100% !important;
+      padding: 0 !important;
+      margin-bottom: 1.2rem !important;
+      order: 1 !important;
+    }
+    .q-headline {
+      font-size: 2.1rem !important;
+      line-height: 1.05 !important;
+    }
+    .q-divider {
+      margin: 0.7rem 0 !important;
+      height: 2px !important;
+    }
+    .q-desc {
+      font-size: 0.85rem !important;
+      line-height: 1.5 !important;
+    }
+    .q-img-left {
+      display: none !important;
+    }
+    .q-img-right {
+      position: relative !important;
+      width: 100% !important;
+      height: 24vh !important;
+      margin-top: 0 !important;
+      bottom: auto !important;
+      right: auto !important;
+      border-radius: 1.5rem !important;
+      overflow: hidden !important;
+      order: 2 !important;
+    }
+    .q-img-right img {
+      border-radius: 1.5rem !important;
+    }
+    .q-squiggle {
+      display: none !important;
+    }
+
+    /* CONTACT & FOOTER SECTION (SECTION 5 COMPACT FULLY VISIBLE LAYOUT) */
+    #contact {
+      height: 100vh !important;
+      box-sizing: border-box !important;
+    }
+    .contact-top {
+      flex: 0 0 auto !important;
+      min-height: auto !important;
+      padding: 6vh 6vw 1.5rem !important;
+    }
+    .ct-left {
+      width: 100% !important;
+    }
+    .ct-brand {
+      margin-bottom: 0.6rem !important;
+      font-size: 0.75rem !important;
+    }
+    .ct-brand .line {
+      width: 40px !important;
+    }
+    .ct-headline {
+      font-size: 1.8rem !important;
+      line-height: 1.1 !important;
+    }
+    .ct-right {
+      display: none !important;
+    }
+    .ct-sparkle {
+      display: none !important;
+    }
+
+    .contact-bottom {
+      flex: 1 1 auto !important;
+      padding: 1.5rem 6vw 7.5rem !important;
+      box-sizing: border-box !important;
+    }
+    .footer-grid {
+      grid-template-columns: 1fr 1fr !important;
+      gap: 1.2rem !important;
+    }
+    .footer-brand {
+      grid-column: span 2 !important;
+      gap: 0.4rem !important;
+    }
+    .footer-brand .brand-logo {
+      font-size: 1.3rem !important;
+    }
+    .footer-brand .desc {
+      font-size: 0.78rem !important;
+      max-width: 100% !important;
+      line-height: 1.4 !important;
+    }
+    .footer-col h4 {
+      font-size: 0.78rem !important;
+      margin-bottom: 0.2rem !important;
+    }
+    .footer-links {
+      gap: 0.4rem !important;
+    }
+    .footer-links a {
+      font-size: 0.78rem !important;
+    }
+    .footer-newsletter {
+      grid-column: span 2 !important;
+      gap: 0.4rem !important;
+    }
+    .footer-newsletter p {
+      font-size: 0.78rem !important;
+    }
+    .subscribe-form {
+      padding-bottom: 0.2rem !important;
+    }
+    .subscribe-form input {
+      font-size: 0.78rem !important;
+    }
+    .footer-bottom-line {
+      flex-direction: column !important;
+      gap: 0.4rem !important;
+      margin-top: 1rem !important;
+      padding-top: 1rem !important;
+      font-size: 0.7rem !important;
+      text-align: center !important;
+    }
+    
+  }
+  #intro {
+    background: url('https://res.cloudinary.com/dqfmlcbew/image/upload/v1784560657/ChatGPT_Image_Jul_15_2026_09_49_29_PM_pal2le.png') center/cover no-repeat !important;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .boot-wrap.sway-active img{animation:none;}
+    .scroll-cue .bar{animation:none;}
+    #intro{animation:none;}
+    .intro-chevron{animation:none;}
+  }
+</style>
+</head>
+<body>
+
+<div id="intro">
+  <div class="intro-chevron chevron-tl"><span></span><span></span><span></span></div>
+  <div class="intro-chevron chevron-br"><span></span><span></span><span></span></div>
+  <div class="intro-inner">
+    <div class="intro-caption">Smart, Calculated Performance</div>
+    <div class="intro-wordmark">
+      <span class="line">PEAK</span>
+      <span class="line accent">THEORY</span>
+    </div>
+  </div>
+  <div class="ball-marker" id="markerIntro" aria-hidden="true"></div>
+  <div class="intro-sweep"></div>
+</div>
+
+<script>
+  (function(){
+    var hideNow = document.querySelectorAll('.intro-caption, .intro-wordmark .line');
+    hideNow.forEach(function(el){ el.style.opacity = '0'; });
+    setTimeout(function(){
+      var intro = document.getElementById('intro');
+      if(intro && intro.style.display !== 'none'){
+        intro.style.transition = 'opacity 0.6s ease';
+        intro.style.opacity = '0';
+        setTimeout(function(){ intro.style.display = 'none'; }, 650);
+      }
+      document.querySelectorAll('.hero-copy > *, .hero-visual').forEach(function(el){ el.style.opacity = '1'; });
+      document.querySelector('.boot-wrap').classList.add('sway-active');
+    }, 3200);
+  })();
+</script>
+
+<nav id="nav">
+  <div class="mark"><span class="dot"></span>PEAK THEORY</div>
+  <ul>
+    <li><a href="/products">Balls</a></li>
+    <li><a href="/collection">Boots</a></li>
+    <li><a href="/lab">Lab</a></li>
+    <li><a href="/quality">Quality</a></li>
+    <li><a href="/contact">Contact</a></li>
+  </ul>
+</nav>
+
+<canvas id="webgl"></canvas>
+
+<div id="track">
+
+  <section class="panel" id="hero">
+    <div class="hero-bg-image" aria-hidden="true"></div>
+    <div class="hero-visual">
+      <div class="orb orb-fill" id="orbHeroFill" aria-hidden="true"></div>
+      <div class="orb orb-ring" id="orbHeroRing" aria-hidden="true"></div>
+      <div class="ball-marker" id="markerHero" aria-hidden="true"></div>
+      <div class="boot-wrap">
+        <img src="https://res.cloudinary.com/dqfmlcbew/image/upload/v1783884189/ChatGPT_Image_Jul_13_2026_at_12_21_05_AM_t3kiul.png" alt="Peak Theory performance boot, right bottom corner points down-right">
+      </div>
+    </div>
+    <div class="hero-copy">
+      <div class="eyebrow"><span class="dot"></span>Peak Theory / Season 01</div>
+      <h1>Calculated<br><span class="accent">Precision.</span></h1>
+      <p class="lede">Performance built on pure data. Clean, mathematical design engineered to elevate every movement on the pitch.</p>
+      <div class="hero-cta" id="heroCta">Explore the build →</div>
+    </div>
+    <div class="scroll-cue"><div class="bar"></div>Scroll to strike</div>
+  </section>
+
+  <section class="panel" id="reveal">
+    <div class="reveal-bg-image" aria-hidden="true"></div>
+    <div class="ball-visual">
+      <div class="ball-marker" id="markerReveal" aria-hidden="true"></div>
+      <img id="openBallImg" src="https://res.cloudinary.com/dqfmlcbew/image/upload/v1783884191/ChatGPT_Image_Jul_12_2026_at_12_12_07_AM_brqm63.png" alt="Exploded view of the Peak Theory match ball construction">
+    </div>
+    <div class="reveal-copy">
+      <div class="eyebrow"><span class="dot"></span>Inside the build</div>
+      <h2>Five layers.<br>One perfect strike.</h2>
+      <div class="feature-list">
+        <div class="feature"><div class="num">01</div><div class="name">Outer shell</div><div class="sub">Engineered panel geometry, low-profile seams</div></div>
+        <div class="feature"><div class="num">02</div><div class="name">Reinforced mesh</div><div class="sub">Structural layer that holds true shape</div></div>
+        <div class="feature"><div class="num">03</div><div class="name">Dual lining</div><div class="sub">Cushioning and consistent energy return</div></div>
+        <div class="feature"><div class="num">04</div><div class="name">Pressure bladder</div><div class="sub">Valve-sealed core for predictable flight</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="outro">
+    <div class="section-split">
+      <div class="split-top">
+        <div class="headline-group">
+          <div class="eyebrow"><span class="dot"></span>Season 01</div>
+          <h2 class="headline-block"><span class="chip">Ready To</span><br><span class="line-white">Play Smarter.</span></h2>
+        </div>
+        <p class="split-desc">Same five-layer build in every ball we make. Nothing hidden, nothing skipped — just consistent performance, match after match.</p>
+      </div>
+      <div class="split-bottom">
+        <div class="split-panel-list">
+          <div class="split-item"><div class="check">✓</div><div><div class="item-name">Consistent Craft</div><div class="item-sub">Every ball built to the same exact standard.</div></div></div>
+          <div class="split-item"><div class="check">✓</div><div><div class="item-name">Trusted Materials</div><div class="item-sub">Tested components, no shortcuts taken.</div></div></div>
+          <div class="split-item"><div class="check">✓</div><div><div class="item-name">Built To Last</div><div class="item-sub">Engineered for a full season of play.</div></div></div>
+        </div>
+        <div class="split-photo">
+          <img class="split-photo-img" src="https://res.cloudinary.com/dqfmlcbew/image/upload/v1783966853/ChatGPT_Image_Jul_13_2026_11_20_31_PM_gaw9ss.png" alt="Player in Peak Theory kit">
+          <div class="outro-ball-visual">
+            <div class="ball-marker" id="markerOutro" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="quality">
+    <div class="q-bg-diamond"></div>
+    
+    <div class="q-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M12 2v20M19 5l-14 14M22 12H2M19 19L5 5"/></svg>
+      Peak Theory Co
+      <div class="line"></div>
+    </div>
+
+    <div class="q-content">
+      <h2 class="q-headline">MANUFACTURING<br>EXCELLENCE<br>& QUALITY</h2>
+      <div class="q-divider"></div>
+      <p class="q-desc">Our manufacturing process has evolved over years of meticulous engineering. In our world-class factories, strict guidelines dictate every stitch and seal. From selecting premium performance materials to utilizing advanced automated testing, we prioritize durability without sacrificing precision. Today, Peak Theory operates under globally recognized standards to ensure superior quality and structural integrity in every product.</p>
+    </div>
+
+    <div class="q-img-left">
+      <img src="https://www.arabnews.pk/sites/default/files/2022/12/09/3578896-710280183.jpeg" alt="Workers constructing balls in factory">
+      <div class="q-squiggle q-squiggle-top">
+        <svg viewBox="0 0 90 30" fill="var(--neon)" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="15" cy="15" r="15"/><circle cx="45" cy="15" r="15"/><circle cx="75" cy="15" r="15"/>
+        </svg>
+      </div>
+    </div>
+    
+    <div class="q-img-right">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFONpV0aRSdtLR5r5y8diJ-EdN-Auzy4fHZCy62IC1fd7HWMWvEN5aWfTo&s=10" alt="Tennis ball next to racket lines">
+      <div class="q-squiggle q-squiggle-bottom">
+        <svg viewBox="0 0 90 30" fill="var(--neon)" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="15" cy="15" r="15"/><circle cx="45" cy="15" r="15"/><circle cx="75" cy="15" r="15"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="contact">
+    <div class="contact-top">
+      <div class="ct-left">
+        <div class="ct-brand">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M12 2v20M19 5l-14 14M22 12H2M19 19L5 5"/></svg>
+          Peak Theory Co
+          <div class="line"></div>
+        </div>
+        <h2 class="ct-headline">ENGINEERED<br>PERFORMANCE<br>DYNAMICS</h2>
+      </div>
+      
+      <svg class="ct-sparkle" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 0V100M0 50H100M15 15L85 85M15 85L85 15" stroke="#d7ff3e" stroke-width="8"/>
+      </svg>
+
+      <div class="ct-right">
+        <img src="https://peplanning.org.uk/wp-content/uploads/2023/01/Sportsmanship-2-954x1024.jpeg" alt="Athletes shaking hands at the net">
+      </div>
+    </div>
+    
+    <div class="contact-bottom">
+      <div class="footer-grid">
+        <div class="footer-col footer-brand">
+          <div class="brand-logo"><span class="dot"></span>PEAK THEORY</div>
+          <p class="desc">Engineering the modern game with calculation, data and peak aesthetics.</p>
+        </div>
+        
+        <div class="footer-col">
+          <h4>Products</h4>
+          <ul class="footer-links">
+            <li><a href="/collection">Performance Boots</a></li>
+            <li><a href="/products">Match Balls</a></li>
+            <li><a href="/lab">The Lab Gear</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul class="footer-links">
+            <li><a href="/contact">Contact Team</a></li>
+            <li><a href="#">F.A.Q.</a></li>
+            <li><a href="#">Sizing Guide</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col footer-newsletter">
+          <h4>Stay Connected</h4>
+          <p>Sign up to receive updates on advanced releases.</p>
+          <div class="subscribe-form">
+            <input type="email" placeholder="Enter your email" aria-label="Email Address">
+            <button aria-label="Subscribe">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="footer-bottom-line">
+          <span>&copy; 2026 Peak Theory Co. All rights reserved.</span>
+          <span>Designed with calculations.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ==========================================================================
+   THREE.JS SCENE SETUP
+   ========================================================================== */
+const canvas = document.getElementById('webgl');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputEncoding = THREE.sRGBEncoding;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(42, window.innerWidth/window.innerHeight, 0.1, 100);
+camera.position.set(0, 0, 9);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+const flood = new THREE.DirectionalLight(0xffffff, 1.15);
+flood.position.set(4, 7, 6);
+scene.add(flood);
+const rimNeon = new THREE.PointLight(0xd7ff3e, 1.7, 26);
+rimNeon.position.set(-4, -1, 5);
+scene.add(rimNeon);
+const rimPitch = new THREE.PointLight(0x3d8f45, 1.1, 26);
+rimPitch.position.set(4, 2, 4);
+scene.add(rimPitch);
+
+const ballGroup = new THREE.Group();
+ballGroup.visible = false;
+scene.add(ballGroup);
+
+const placeholder = new THREE.Mesh(
+  new THREE.IcosahedronGeometry(1.1, 1),
+  new THREE.MeshStandardMaterial({color:0xf6f7f1, flatShading:true, roughness:0.4, metalness:0.05})
+);
+ballGroup.add(placeholder);
+
+const gltfLoader = new THREE.GLTFLoader();
+gltfLoader.load("{% static 'advanced/football.glb' %}", (gltf) => {
+  const solid = gltf.scene.getObjectByName('Solid');
+  if(!solid) return;
+
+  solid.traverse(child => {
+    if(child.isMesh){
+      const mats = Array.isArray(child.material) ? child.material : [child.material];
+      mats.forEach(mat => {
+        if(mat.name === 'white') mat.color.set(0xf6f7f1);
+        if(mat.name === 'white.001') mat.color.set(0x0f1210);
+        mat.roughness = 0.45;
+        mat.metalness = 0.08;
+        mat.side = THREE.DoubleSide;
+        mat.needsUpdate = true;
+      });
+    }
+  });
+
+  const container = new THREE.Group();
+  container.add(solid);
+
+  const box = new THREE.Box3().setFromObject(container);
+  const size = new THREE.Vector3();
+  box.getSize(size);
+  const scale = 2.2 / (Math.max(size.x, size.y, size.z) || 1);
+  container.scale.setScalar(scale);
+  const center = new THREE.Vector3();
+  box.getCenter(center);
+  container.position.copy(center).multiplyScalar(-scale);
+
+  ballGroup.add(container);
+  placeholder.visible = false;
+}, undefined, (err) => {
+  console.warn('football.glb failed to load — keeping placeholder ball.', err);
+});
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+/* ==========================================================================
+   MARKER-BASED COORDINATE MAPPING
+   ========================================================================== */
+const BASE_BALL_DIAMETER = 2.2;
+
+function screenToWorld(px, py, targetZ = 0){
+  const ndcX = (px / window.innerWidth) * 2 - 1;
+  const ndcY = -(py / window.innerHeight) * 2 + 1;
+  const vec = new THREE.Vector3(ndcX, ndcY, 0.5).unproject(camera);
+  const dir = vec.sub(camera.position).normalize();
+  const distance = (targetZ - camera.position.z) / dir.z;
+  return camera.position.clone().addScaledVector(dir, distance);
+}
+
+function getMarkerWorldPos(markerEl, targetZ = 0){
+  const rect = markerEl.getBoundingClientRect();
+  const panelEl = markerEl.closest('.panel');
+  const panelTop = panelEl ? panelEl.getBoundingClientRect().top : 0;
+  const cx = rect.left + rect.width / 2;
+  const cyWithinPanel = (rect.top - panelTop) + rect.height / 2;
+  return screenToWorld(cx, cyWithinPanel, targetZ);
+}
+
+function getMarkerScale(markerEl){
+  const rect = markerEl.getBoundingClientRect();
+  const y = rect.top + rect.height / 2;
+  const p1 = screenToWorld(rect.left, y, 0);
+  const p2 = screenToWorld(rect.right, y, 0);
+  return p1.distanceTo(p2) / BASE_BALL_DIAMETER;
+}
+
+const markerIntro = document.getElementById('markerIntro');
+const markerHero = document.getElementById('markerHero');
+const markerReveal = document.getElementById('markerReveal');
+const markerOutro = document.getElementById('markerOutro');
+
+ballGroup.position.copy(getMarkerWorldPos(markerIntro));
+ballGroup.scale.setScalar(getMarkerScale(markerIntro));
+ballGroup.visible = true;
+
+let heroIdleActive = false;
+let introIdleActive = true;
+let outroIdleActive = false;
+const clock = new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const idleMarker = introIdleActive ? markerIntro : (heroIdleActive ? markerHero : (outroIdleActive ? markerOutro : null));
+  if(idleMarker){
+    const t = clock.getElapsedTime();
+    const base = getMarkerWorldPos(idleMarker);
+    const s = getMarkerScale(idleMarker);
+    ballGroup.scale.setScalar(s);
+    if(!reduceMotion){
+      ballGroup.rotation.y += 0.006;
+      ballGroup.position.set(base.x, base.y + Math.sin(t * 1.1) * 0.08 * s, base.z);
+    } else {
+      ballGroup.position.copy(base);
+    }
+  }
+  renderer.render(scene, camera);
+}
+animate();
+
+/* ==========================================================================
+   INTRO SEQUENCE
+   ========================================================================== */
+let introPlaying = true;
+function playIntro(){
+  const tl = gsap.timeline({onComplete: () => {
+    introPlaying = false;
+    introIdleActive = false;
+    heroIdleActive = true;
+    document.getElementById('intro').style.display = 'none';
+  }});
+
+  if(reduceMotion){
+    tl.set('.intro-caption, .intro-wordmark .line', {opacity:1, y:0})
+      .call(() => {
+        introIdleActive = false;
+        ballGroup.position.copy(getMarkerWorldPos(markerHero));
+        ballGroup.scale.setScalar(getMarkerScale(markerHero));
+      }, null, 0.2)
+      .to('#intro', {opacity:0, duration:0.4}, 0.3);
+    return;
+  }
+
+  tl.fromTo('.intro-caption', {opacity:0, y:20, letterSpacing:"0.1em"}, {opacity:1, y:0, letterSpacing:"0.3em", duration:0.7, ease:"power3.out"}, 0.1)
+    .fromTo('.intro-wordmark .line', {opacity:0, scale:0.7, y:40}, {opacity:1, scale:1, y:0, duration:0.8, stagger:0.15, ease:'back.out(1.5)'}, 0.2)
+    .to('.intro-sweep', {xPercent:260, duration:1.5, ease:'power2.inOut'}, 0.3)
+    .to({}, {duration:0.4}, 1.0)
+    .to({t:0}, {
+      t:1, duration:0.85, ease:'power4.inOut',
+      onUpdate: function(){
+        const p = this.targets()[0].t;
+        const from = getMarkerWorldPos(markerIntro);
+        const to = getMarkerWorldPos(markerHero);
+        const fromS = getMarkerScale(markerIntro);
+        const toS = getMarkerScale(markerHero);
+        ballGroup.position.lerpVectors(from, to, p);
+        ballGroup.scale.setScalar(fromS + (toS - fromS) * p);
+        ballGroup.rotation.y += 0.02;
+      }
+    }, 1.4)
+    .to('#intro', {yPercent:-100, duration:0.85, ease:'power4.inOut'}, 1.4)
+    .fromTo('.hero-copy > *', {opacity:0, y:22}, {opacity:1, y:0, duration:0.55, stagger:0.1}, 1.75)
+    .fromTo('.boot-wrap', {opacity:0, scale:0.9}, {opacity:1, scale:1, duration:0.6, ease:'power2.out'}, 1.8);
+
+  gsap.set('.boot-wrap', {opacity:0});
+  gsap.set('.hero-copy > *', {opacity:0});
+}
+
+/* ==========================================================================
+   NAV DOCKING
+   ========================================================================= */
+const navEl = document.getElementById('nav');
+function setNavDocked(docked){
+  navEl.classList.toggle('docked', docked);
+}
+
+/* ==========================================================================
+   SNAP PAGING / SCROLL CONTROL
+   ========================================================================== */
+const track = document.getElementById('track');
+const totalSections = 5;
+let currentSection = 0;
+let isAnimating = false;
+
+function slideTrack(index, duration, ease){
+  return gsap.to(track, {y: -index * window.innerHeight, duration, ease});
+}
+
+function goToSection(index){
+  if(index < 0 || index >= totalSections || isAnimating || introPlaying) return;
+  const prev = currentSection;
+  isAnimating = true;
+  currentSection = index;
+  setNavDocked(index > 0);
+
+  if(prev === 0 && index === 1){
+    playKickTransition(() => { isAnimating = false; });
+  } else if(prev === 1 && index === 2){
+    playBounceTransition(() => { isAnimating = false; });
+  } else if(prev === 2 && index === 3){
+    outroIdleActive = false;
+    gsap.timeline({onComplete: () => { isAnimating = false; }})
+      .to(ballGroup.scale, {x:0.001, y:0.001, z:0.001, duration:0.4, ease:'power2.in'}, 0)
+      .add(slideTrack(3, 0.9, 'power3.inOut'), 0);
+  } else {
+    slideTrack(index, 0.9, 'power3.inOut').eventCallback('onComplete', () => { isAnimating = false; });
+  }
+}
+
+function goBack(){
+  if(currentSection === 0 || isAnimating || introPlaying) return;
+  const prev = currentSection;
+  const target = currentSection - 1;
+  isAnimating = true;
+  currentSection = target;
+  setNavDocked(target > 0);
+
+  if(prev === 2 && target === 1){
+    playBounceBackTransition(() => { isAnimating = false; });
+  } else if(prev === 1 && target === 0){
+    playKickBackTransition(() => { isAnimating = false; });
+  } else if(prev === 3 && target === 2){
+    const outroScale = getMarkerScale(markerOutro);
+    gsap.timeline({onComplete: () => { isAnimating = false; outroIdleActive = true; }})
+      .add(slideTrack(2, 0.85, 'power3.inOut'), 0)
+      .to(ballGroup.scale, {x:outroScale, y:outroScale, z:outroScale, duration:0.5, ease:'back.out(1.5)'}, 0.3);
+  } else {
+    slideTrack(target, 0.85, 'power3.inOut').eventCallback('onComplete', () => { isAnimating = false; });
+  }
+}
+
+/* ==========================================================================
+   TRANSITION 1: HERO -> REVEAL (PREPARATION SHIFT, SCALE & STRIKE IMPACT)
+   ========================================================================== */
+function playKickTransition(done){
+  heroIdleActive = false;
+  const bootEl = document.querySelector('.boot-wrap');
+  bootEl.classList.remove('sway-active');
+
+  const heroPos = getMarkerWorldPos(markerHero);
+  const heroScale = getMarkerScale(markerHero);
+  const endPos = getMarkerWorldPos(markerReveal);
+
+  const bounceTopRight = screenToWorld(window.innerWidth * 0.66, window.innerHeight * 0.07, 0);
+  const bounceBottomRight = screenToWorld(window.innerWidth * 0.89, window.innerHeight * 0.86, 0);
+
+  ballGroup.visible = true;
+  ballGroup.position.copy(heroPos);
+  ballGroup.scale.setScalar(heroScale);
+  ballGroup.rotation.set(0, ballGroup.rotation.y, 0);
+
+  const tl = gsap.timeline({onComplete: () => { done(); }});
+
+  tl.to('.hero-copy > *', {opacity:0, x:40, duration:0.22, stagger:0.02, ease:'power2.in'}, 0)
+    .to(['#orbHeroFill', '#orbHeroRing'], {opacity:0, scale:0.7, duration:0.1, ease:'none'}, 0)
+    .to(ballGroup.position, {x: heroPos.x + 0.8, duration:0.4, ease:'power2.out'}, 0)
+    .to(bootEl, {scale:1.55, x:'4vw', y:'2vh', rotate:-90, duration:0.4, ease:'power2.out'}, 0)
+    .to(bootEl, {x:'28vw', y:'-26vh', rotate:-45, duration:0.24, ease:'power3.in'}, 0.4)
+    .to(ballGroup.position, {x: bounceTopRight.x, y: bounceTopRight.y, z: bounceTopRight.z, duration:0.38, ease:'power2.out'}, 0.64)
+    .to(ballGroup.rotation, {x:'+=6.5', y:'+=5', z:'+=3', duration:1.3, ease:'none'}, 0.64)
+    .to(bootEl, {x:0, y:0, scale:1, rotate:0, opacity:0, duration:0.5, ease:'power2.out'}, 0.72)
+    .to(ballGroup.scale, {x: heroScale * 1.25, y: heroScale * 0.75, z: heroScale * 1.25, duration:0.05, yoyo:true, repeat:1, ease:'power1.inOut'}, 0.97)
+    .to(ballGroup.position, {x: bounceBottomRight.x, y: bounceBottomRight.y, z: bounceBottomRight.z, duration:0.44, ease:'power2.in'}, 1.02)
+    .to(ballGroup.scale, {y: heroScale * 0.65, x: heroScale * 1.2, z: heroScale * 1.2, duration:0.06, yoyo:true, repeat:1, ease:'power1.inOut'}, 1.46)
+    .add(slideTrack(1, 0.85, 'power2.inOut'), 1.38)
+    .to(ballGroup.position, {x: endPos.x, y: endPos.y, z: endPos.z, duration:0.45, ease:'power1.out'}, 1.52)
+    .to(ballGroup.scale, {x: 0.001, y: 0.001, z: 0.001, duration:0.15, ease:'power2.in'}, 1.82)
+    .call(() => { ballGroup.visible = false; }, null, 1.97)
+    .to('#openBallImg', {opacity:1, scale:1, duration:0.4, ease:'power2.out'}, 1.82)
+    .fromTo('.reveal-copy > *', {opacity:0, y:20}, {opacity:1, y:0, duration:0.45, stagger:0.06}, 1.9);
+}
+
+/* ==========================================================================
+   TRANSITION 2: REVEAL -> OUTRO
+   ========================================================================== */
+function playBounceTransition(done){
+  const startPos = getMarkerWorldPos(markerReveal);
+  const startScale = getMarkerScale(markerReveal);
+  const outroPos = getMarkerWorldPos(markerOutro);
+
+  ballGroup.visible = true;
+  ballGroup.scale.setScalar(0.001);
+  ballGroup.position.copy(startPos);
+
+  const mid = startPos.clone().lerp(outroPos, 0.55);
+  const apex1 = startPos.clone().lerp(mid, 0.5).add(new THREE.Vector3(0, 2.0, 0.9));
+  const apex2 = mid.clone().lerp(outroPos, 0.5).add(new THREE.Vector3(0, 1.1, 0.5));
+  const curve1 = new THREE.CatmullRomCurve3([startPos, apex1, mid]);
+  const curve2 = new THREE.CatmullRomCurve3([mid, apex2, outroPos]);
+
+  const tl = gsap.timeline({onComplete: done});
+
+  tl.to('#openBallImg', {opacity:0, scale:0.92, duration:0.3, ease:'power2.in'}, 0)
+    .fromTo(ballGroup.scale, {x:0.001, y:0.001, z:0.001}, {x:startScale, y:startScale, z:startScale, duration:0.3, ease:'back.out(2)'}, 0.08)
+    .to({t:0}, {
+      t:1, duration:0.32, ease:'power1.out',
+      onUpdate: function(){
+        ballGroup.position.copy(curve1.getPoint(this.targets()[0].t));
+        ballGroup.rotation.x += 0.24;
+      }
+    }, 0.3)
+    .to(ballGroup.scale, {x:startScale*1.15, y:startScale*0.75, z:startScale*1.15, duration:0.07}, 0.6)
+    .to(ballGroup.scale, {x:startScale, y:startScale, z:startScale, duration:0.14, ease:'elastic.out(1,0.5)'}, 0.67)
+    .add(slideTrack(2, 0.85, 'power3.inOut'), 0.55)
+    .to({t:0}, {
+      t:1, duration:0.3, ease:'power2.in',
+      onUpdate: function(){
+        ballGroup.position.copy(curve2.getPoint(this.targets()[0].t));
+        ballGroup.rotation.x += 0.2;
+      }
+    }, 0.62)
+    .call(() => { heroIdleActive = false; outroIdleActive = true; }, null, 0.92);
+}
+
+/* ==========================================================================
+   REVERSE BACKWARD TRANSITIONS
+   ========================================================================== */
+function playBounceBackTransition(done){
+  outroIdleActive = false;
+  ballGroup.visible = false;
+  gsap.timeline({onComplete: done})
+    .add(slideTrack(1, 0.85, 'power3.inOut'), 0)
+    .to('#openBallImg', {opacity:1, scale:1, duration:0.4, ease:'power2.out'}, 0.2);
+}
+
+function playKickBackTransition(done){
+  const heroScale = getMarkerScale(markerHero);
+  const bootEl = document.querySelector('.boot-wrap');
+  gsap.timeline({onComplete: () => { 
+    heroIdleActive = true; 
+    bootEl.classList.add('sway-active');
+    done(); 
+  }})
+    .to('#openBallImg', {opacity:0, scale:0.92, duration:0.25, ease:'power2.in'}, 0)
+    .add(slideTrack(0, 0.85, 'power3.inOut'), 0.1)
+    .set(bootEl, {opacity:1, rotate:0, scale:1, x:0, y:0}, 0.1)
+    .call(() => {
+      ballGroup.visible = true;
+      ballGroup.position.copy(getMarkerWorldPos(markerHero));
+      ballGroup.scale.set(0.001, 0.001, 0.001);
+    }, null, 0.35)
+    .to(ballGroup.scale, {x:heroScale, y:heroScale, z:heroScale, duration:0.35, ease:'back.out(2)'}, 0.35)
+    .to(['#orbHeroFill', '#orbHeroRing'], {opacity:1, scale:1, duration:0.4, ease:'power2.out'}, 0.4)
+    .to('.hero-copy > *', {opacity:1, x:0, y:0, duration:0.45, stagger:0.06, ease:'power2.out'}, 0.4);
+}
+
+/* ==========================================================================
+   USER INPUT & INTERACTION HANDLING
+   ========================================================================== */
+let wheelLock = false;
+window.addEventListener('wheel', (e) => {
+  if(introPlaying || isAnimating || wheelLock) return;
+  if(Math.abs(e.deltaY) < 6) return;
+  wheelLock = true;
+  setTimeout(() => wheelLock = false, 120);
+  if(e.deltaY > 0) goToSection(currentSection + 1);
+  else goBack();
+}, {passive:true});
+
+let touchStartY = null;
+window.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, {passive:true});
+window.addEventListener('touchmove', (e) => { e.preventDefault(); }, {passive:false});
+window.addEventListener('touchend', (e) => {
+  if(touchStartY === null || introPlaying || isAnimating) return;
+  const delta = touchStartY - e.changedTouches[0].clientY;
+  touchStartY = null;
+  if(Math.abs(delta) < 40) return;
+  if(delta > 0) goToSection(currentSection + 1);
+  else goBack();
+}, {passive:true});
+
+window.addEventListener('keydown', (e) => {
+  if(introPlaying || isAnimating) return;
+  if(['ArrowDown','PageDown'].includes(e.key)) goToSection(currentSection + 1);
+  if(['ArrowUp','PageUp'].includes(e.key)) goBack();
+});
+
+document.getElementById('heroCta').addEventListener('click', () => goToSection(1));
+
+window.addEventListener('resize', () => {
+  gsap.set(track, {y: -currentSection * window.innerHeight});
+});
+
+/* ==========================================================================
+   REDUCED MOTION ACCESSIBILITY FALLBACK
+   ========================================================================== */
+if(reduceMotion){
+  document.body.classList.add('free-scroll');
+  track.style.position = 'static';
+  track.style.height = 'auto';
+  document.getElementById('webgl').style.position = 'absolute';
+  gsap.set('#openBallImg', {opacity:1, scale:1});
+}
+
+playIntro();
+</script>
+{% include "advanced/cart.html" %}
+</body>
+</html>
