@@ -341,6 +341,11 @@
           top: 40px;
           height: calc(100% - 40px);
           overflow-y: auto;
+          justify-content: flex-start; /* Ensures scroll layout functions for short mobile screens */
+        }
+
+        .detail-panel::before {
+          min-height: 35%; /* Adjust clearance for shrunken mobile image */
         }
       
         .btn-close {
@@ -351,6 +356,7 @@
       
         .detail-info {
           padding-top: 0;
+          margin-top: auto;
         }
       
         .detail-info h3 {
@@ -513,9 +519,20 @@
         pointer-events: none;
         display: flex;
         flex-direction: column;
-        justify-content: flex-end;
+        justify-content: flex-start; /* Changed from flex-end to allow proper scrolling on overflow */
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
         padding: 2rem;
         border-top: 4px solid var(--accent-red);
+      }
+
+      /* Spacer to push text out from underneath the shrunken image */
+      .detail-panel::before {
+        content: '';
+        display: block;
+        flex-shrink: 0;
+        min-height: 45%; 
+        width: 100%;
       }
       
       .btn-close {
@@ -541,6 +558,7 @@
         opacity: 0;
         transform: translateY(20px);
         padding-top: 1rem;
+        margin-top: auto; /* Forces content to the bottom visually without breaking the scroll container */
       }
       
       .detail-info h3 {
