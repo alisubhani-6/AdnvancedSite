@@ -205,6 +205,20 @@
       flex-shrink: 0;
     }
 
+    .header:not(.docked) {
+      gap: 0.4rem;
+      overflow-x: hidden;
+    }
+    .header:not(.docked) .logo {
+      font-size: 0.9rem;
+    }
+    .header:not(.docked) .center-nav {
+      gap: 0.45rem;
+    }
+    .header:not(.docked) .center-nav a {
+      font-size: 0.58rem;
+    }
+
     .desktop-contact { display: none; }
     .mobile-contact-link { display: inline-block; flex-shrink: 0; }
   }
