@@ -386,7 +386,7 @@
   .details-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: var(--bg-dark); z-index: 200; display: flex;
-    transform: translateY(100%); pointer-events: none;
+    transform: translateY(100%); pointer-events: none; touch-action: pan-y;
   }
   .details-left {
     flex: 1; border-right: 1px solid var(--grid-line);
@@ -876,27 +876,57 @@
           "-=1.0"
         );
 
+      let activeQuadrantIndex = null;
+
+      function showQuadrantDetails(idx) {
+        const data = specData[idx];
+        if (!data) return;
+
+        activeQuadrantIndex = Number(idx);
+        document.getElementById('spec-tag').innerText = data.tag;
+        document.getElementById('spec-title').innerText = data.title;
+        document.getElementById('spec-body').innerText = data.body;
+        document.getElementById('spec-m1-label').innerText = data.m1_label;
+        document.getElementById('spec-m1-val').innerText = data.m1_val;
+        document.getElementById('spec-m2-label').innerText = data.m2_label;
+        document.getElementById('spec-m2-val').innerText = data.m2_val;
+        document.getElementById('spec-img').src = data.img;
+      }
+
       // Fullscreen Activation
       quadrants.forEach((quad) => {
         quad.addEventListener('click', () => {
           const idx = quad.getAttribute('data-index');
-          const data = specData[idx];
-
-          // Populate data
-          document.getElementById('spec-tag').innerText = data.tag;
-          document.getElementById('spec-title').innerText = data.title;
-          document.getElementById('spec-body').innerText = data.body;
-          document.getElementById('spec-m1-label').innerText = data.m1_label;
-          document.getElementById('spec-m1-val').innerText = data.m1_val;
-          document.getElementById('spec-m2-label').innerText = data.m2_label;
-          document.getElementById('spec-m2-val').innerText = data.m2_val;
-          document.getElementById('spec-img').src = data.img;
+          showQuadrantDetails(idx);
 
           overlay.style.pointerEvents = 'auto';
           document.body.style.overflow = 'hidden'; // Lock background scrolling
           modalTl.play();
         });
       });
+
+      let touchStartX = null;
+      let touchStartY = null;
+      overlay.addEventListener('touchstart', (event) => {
+        if (event.touches.length !== 1) return;
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+      }, { passive: true });
+
+      overlay.addEventListener('touchend', (event) => {
+        if (touchStartX === null || touchStartY === null || activeQuadrantIndex === null) return;
+
+        const deltaX = event.changedTouches[0].clientX - touchStartX;
+        const deltaY = event.changedTouches[0].clientY - touchStartY;
+        touchStartX = null;
+        touchStartY = null;
+
+        if (Math.abs(deltaX) < 50 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+
+        const direction = deltaX < 0 ? 1 : -1;
+        const nextIndex = ((activeQuadrantIndex - 1 + direction + quadrants.length) % quadrants.length) + 1;
+        showQuadrantDetails(String(nextIndex));
+      }, { passive: true });
 
       // Close Fullscreen Overlay
       closeBtn.addEventListener('click', () => {
